@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.21)
+cmake_minimum_required(VERSION 3.18)
 
 project(
     "CppTemplate"
@@ -30,7 +30,7 @@ option(ENABLE_LTO "Enable to add Link Time Optimization." ON)
 
 set(LIBRARY_NAME "lib")
 set(UNIT_TEST_NAME "unit_tests")
-set(EXECUTABLE_NAME "main")
+set(EXECUTABLE_NAME "ccfolio-exe")
 
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake/)
 include(ConfigSafeGuards)
