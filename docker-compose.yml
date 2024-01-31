@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+  ccfolio-api:
+    build: .
+    ports:
+      - "7001:7001"
+    volumes:
+      - ./Cert:/certs
+    networks:
+      - webnet
+
+  nginx:
+    image: nginx:latest
+    ports:
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+      - ./Cert:/etc/nginx/certs
+    depends_on:
+      - ccfolio-api
+    networks:
+      - webnet
+
+networks:
+  webnet:
