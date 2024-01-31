@@ -1,10 +1,11 @@
-#include <pistache/endpoint.h>
-#include "UserController.h"
-#include "UserRepository.h"
 #include "CreateUserUseCase.h"
 #include "GetUserUseCase.h"
+#include "UserController.h"
+#include "UserRepository.h"
+#include <pistache/endpoint.h>
 
-int main() {
+int main()
+{
     auto userRepository = std::make_shared<UserRepository>();
     auto createUserUseCase = std::make_shared<CreateUserUseCase>(userRepository);
     auto getUserUseCase = std::make_shared<GetUserUseCase>(userRepository);

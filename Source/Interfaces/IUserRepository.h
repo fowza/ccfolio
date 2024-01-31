@@ -4,10 +4,11 @@
 #include "User.h"
 #include <optional>
 
-class IUserRepository {
+class IUserRepository
+{
 public:
     virtual ~IUserRepository() = default;
-    virtual void createUser(const User& user) = 0;
+    virtual void createUser(const User &user) = 0;
     virtual std::optional<User> getUser(int id) = 0;
 };
 

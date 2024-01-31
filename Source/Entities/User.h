@@ -3,16 +3,19 @@
 
 #include <string>
 
-class User {
+class User
+{
 public:
     User() = default;
     User(int id, std::string name) : id(id), name(std::move(name)){};
 
-    int getId() const {
+    int getId() const
+    {
         return id;
     };
 
-    std::string getName() const {
+    std::string getName() const
+    {
         return name;
     };
 

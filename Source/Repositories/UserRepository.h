@@ -4,15 +4,19 @@
 #include "IUserRepository.h"
 #include <unordered_map>
 
-class UserRepository : public IUserRepository {
+class UserRepository : public IUserRepository
+{
 public:
-    void createUser(const User& user) override {
+    void createUser(const User &user) override
+    {
         users[user.getId()] = user;
     }
-    
-    std::optional<User> getUser(int id) override {
+
+    std::optional<User> getUser(int id) override
+    {
         auto it = users.find(id);
-        if (it != users.end()) {
+        if (it != users.end())
+        {
             return it->second;
         }
         return std::nullopt;

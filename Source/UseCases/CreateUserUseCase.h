@@ -5,12 +5,13 @@
 #include "User.h"
 #include <memory>
 
-class CreateUserUseCase {
+class CreateUserUseCase
+{
 public:
-    CreateUserUseCase(std::shared_ptr<IUserRepository> userRepository)
-    : userRepository(std::move(userRepository)) {};
+    CreateUserUseCase(std::shared_ptr<IUserRepository> userRepository) : userRepository(std::move(userRepository)){};
 
-    User execute(const User& user) {
+    User execute(const User &user)
+    {
         userRepository->createUser(user);
         return user;
     };

@@ -1,6 +1,6 @@
 set(LIBRARY_SOURCES "")
 
-set(LIBRARY_HEADERS 
+set(LIBRARY_HEADERS
     "${CMAKE_CURRENT_SOURCE_DIR}/Controllers/UserController.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/Entities/User.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/Interfaces/IUserRepository.h"
@@ -9,14 +9,14 @@ set(LIBRARY_HEADERS
     "${CMAKE_CURRENT_SOURCE_DIR}/UseCases/GetUserUseCase.h"
 )
 
-set(LIBRARY_INCLUDES 
-    "${CMAKE_CURRENT_SOURCE_DIR}"  
-    "${CMAKE_CURRENT_SOURCE_DIR}/Controllers"  
-    "${CMAKE_CURRENT_SOURCE_DIR}/Entities"  
-    "${CMAKE_CURRENT_SOURCE_DIR}/Interfaces" 
-    "${CMAKE_CURRENT_SOURCE_DIR}/Repositories" 
-    "${CMAKE_CURRENT_SOURCE_DIR}/UseCases" 
-    "${CMAKE_BINARY_DIR}/configured_files/include"  
+set(LIBRARY_INCLUDES
+    "${CMAKE_CURRENT_SOURCE_DIR}"
+    "${CMAKE_CURRENT_SOURCE_DIR}/Controllers"
+    "${CMAKE_CURRENT_SOURCE_DIR}/Entities"
+    "${CMAKE_CURRENT_SOURCE_DIR}/Interfaces"
+    "${CMAKE_CURRENT_SOURCE_DIR}/Repositories"
+    "${CMAKE_CURRENT_SOURCE_DIR}/UseCases"
+    "${CMAKE_BINARY_DIR}/configured_files/include"
 )
 
 add_library(${LIBRARY_NAME} STATIC ${LIBRARY_SOURCES} ${LIBRARY_HEADERS})
@@ -27,7 +27,7 @@ target_link_libraries(
             fmt::fmt
             spdlog::spdlog
             cxxopts::cxxopts
-            PkgConfig::Pistache 
+            PkgConfig::Pistache
             )
 
 if(${ENABLE_WARNINGS})
