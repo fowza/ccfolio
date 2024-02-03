@@ -6,10 +6,13 @@ tests:
 install:
 	sudo apt-get install -y gcc g++ cmake make doxygen git llvm pkg-config curl zip unzip tar python3-dev clang-format clang-tidy meson ninja-build
 
-pre_commit:
+install_pre_commit:
 	sudo pip install pre-commit
 	sudo pre-commit install
 	sudo pre-commit install-hooks
+
+pre_commit:
+	pre-commit run --all-files
 
 prepare:
 	rm -rf build

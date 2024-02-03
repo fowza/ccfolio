@@ -1,3 +1,14 @@
+/**
+ * @file GetUserUseCase.h
+ * @author Frederik Pedersen
+ * @brief Use case for getting a user
+ * @version 0.1
+ * @date 2024-02-03
+ *
+ * @copyright Copyright (c) 2024
+ *
+ */
+
 #ifndef GET_USER_USE_CASE_H
 #define GET_USER_USE_CASE_H
 

@@ -1,3 +1,14 @@
+/**
+ * @file IUserRepository.h
+ * @author Frederik Pedersen
+ * @brief Interface for the UserRepository
+ * @version 0.1
+ * @date 2024-02-03
+ *
+ * @copyright Copyright (c) 2024
+ *
+ */
+
 #ifndef IUSER_REPOSITORY_H
 #define IUSER_REPOSITORY_H
 

@@ -1,3 +1,14 @@
+/**
+ * @file CreateUserUseCase.h
+ * @author Frederik Pedersen
+ * @brief Use case for creating a user
+ * @version 0.1
+ * @date 2024-02-03
+ *
+ * @copyright Copyright (c) 2024
+ *
+ */
+
 #ifndef CREATE_USER_USE_CASE_H
 #define CREATE_USER_USE_CASE_H
 

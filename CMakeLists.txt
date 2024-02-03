@@ -35,8 +35,8 @@ set(EXECUTABLE_NAME "ccfolio-exe")
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake/)
 include(ConfigSafeGuards)
 include(AddGitSubmodule)
-include(Docs)
-include(Tools)
+include(docs)
+include(tools)
 
 if(ENABLE_WARNINGS)
     include(Warnings)
@@ -72,11 +72,11 @@ find_package(PkgConfig)
 pkg_check_modules(Pistache REQUIRED IMPORTED_TARGET libpistache)
 
 # SUB DIRECTORIES
-add_subdirectory(Configured)
-add_subdirectory(External)
-add_subdirectory(Source)
-add_subdirectory(App)
-add_subdirectory(Tests)
+add_subdirectory(configured)
+add_subdirectory(external)
+add_subdirectory(src)
+add_subdirectory(app)
+add_subdirectory(tests)
 
 # INSTALL TARGETS
 install(

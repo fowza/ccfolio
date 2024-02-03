@@ -1,3 +1,14 @@
+/**
+ * @file UserController.h
+ * @author Frederik Pedersen
+ * @brief Controller for handling user CRUD operation requests
+ * @version 0.1
+ * @date 2024-02-03
+ *
+ * @copyright Copyright (c) 2024
+ *
+ */
+
 #ifndef USER_CONTROLLER_H
 #define USER_CONTROLLER_H
 
@@ -17,6 +28,10 @@ public:
         setupRoutes();
     }
 
+    /**
+     * @brief Set up the routes for the user controller
+     *
+     */
     void setupRoutes()
     {
         using namespace Pistache::Rest;
@@ -31,6 +46,12 @@ public:
     }
 
 private:
+    /**
+     * @brief Handle the request for creating a new user
+     *
+     * @param request The request
+     * @param response The response
+     */
     void handleCreateUser(const Pistache::Rest::Request &request, Pistache::Http::ResponseWriter response)
     {
         try
@@ -56,6 +77,12 @@ private:
         }
     }
 
+    /**
+     * @brief Handle the request for getting a user
+     *
+     * @param request
+     * @param response
+     */
     void handleGetUser(const Pistache::Rest::Request &request, Pistache::Http::ResponseWriter response)
     {
         try

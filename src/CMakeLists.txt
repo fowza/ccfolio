@@ -1,10 +1,19 @@
 set(LIBRARY_SOURCES "")
 
 set(LIBRARY_HEADERS
+    #Controllers
     "${CMAKE_CURRENT_SOURCE_DIR}/Controllers/UserController.h"
+
+    #Entities
     "${CMAKE_CURRENT_SOURCE_DIR}/Entities/User.h"
+
+    #Interfaces
     "${CMAKE_CURRENT_SOURCE_DIR}/Interfaces/IUserRepository.h"
+
+    #Repositories
     "${CMAKE_CURRENT_SOURCE_DIR}/Repositories/UserRepository.h"
+
+    #UseCases
     "${CMAKE_CURRENT_SOURCE_DIR}/UseCases/CreateUserUseCase.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/UseCases/GetUserUseCase.h"
 )
