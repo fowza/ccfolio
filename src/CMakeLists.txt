@@ -1,43 +1,22 @@
-set(LIBRARY_SOURCES "")
+add_subdirectory(Domain)
+add_subdirectory(Application)
+add_subdirectory(Infrastructure)
+add_subdirectory(Presentation)
 
-set(LIBRARY_HEADERS
-    #Controllers
-    "${CMAKE_CURRENT_SOURCE_DIR}/Controllers/UserController.h"
+add_library(${LIBRARY_NAME} INTERFACE)
 
-    #Entities
-    "${CMAKE_CURRENT_SOURCE_DIR}/Entities/User.h"
-
-    #Interfaces
-    "${CMAKE_CURRENT_SOURCE_DIR}/Interfaces/IUserRepository.h"
-
-    #Repositories
-    "${CMAKE_CURRENT_SOURCE_DIR}/Repositories/UserRepository.h"
-
-    #UseCases
-    "${CMAKE_CURRENT_SOURCE_DIR}/UseCases/CreateUserUseCase.h"
-    "${CMAKE_CURRENT_SOURCE_DIR}/UseCases/GetUserUseCase.h"
+target_link_libraries(${LIBRARY_NAME}
+INTERFACE
+        DomainLib
+        ApplicationLib
+        InfrastructureLib
+        PresentationLib
+        nlohmann_json::nlohmann_json
+        fmt::fmt
+        spdlog::spdlog
+        cxxopts::cxxopts
+        PkgConfig::Pistache
 )
-
-set(LIBRARY_INCLUDES
-    "${CMAKE_CURRENT_SOURCE_DIR}"
-    "${CMAKE_CURRENT_SOURCE_DIR}/Controllers"
-    "${CMAKE_CURRENT_SOURCE_DIR}/Entities"
-    "${CMAKE_CURRENT_SOURCE_DIR}/Interfaces"
-    "${CMAKE_CURRENT_SOURCE_DIR}/Repositories"
-    "${CMAKE_CURRENT_SOURCE_DIR}/UseCases"
-    "${CMAKE_BINARY_DIR}/configured_files/include"
-)
-
-add_library(${LIBRARY_NAME} STATIC ${LIBRARY_SOURCES} ${LIBRARY_HEADERS})
-target_include_directories(${LIBRARY_NAME} PUBLIC ${LIBRARY_INCLUDES})
-target_link_libraries(
-    ${LIBRARY_NAME}
-    PRIVATE nlohmann_json::nlohmann_json
-            fmt::fmt
-            spdlog::spdlog
-            cxxopts::cxxopts
-            PkgConfig::Pistache
-            )
 
 if(${ENABLE_WARNINGS})
     target_set_warnings(
