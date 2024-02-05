@@ -28,3 +28,6 @@ clean-docker:
 
 dependency:
 	cd build && cmake .. --graphviz=graph.dot && dot -Tpng graph.dot -o graphImage.png
+
+odb_schema:
+	odb --std c++11 --database sqlite --generate-query --generate-schema -o ./src/Domain/Entities/odb/ ./src/Domain/Entities/User.h
