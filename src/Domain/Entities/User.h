@@ -12,27 +12,40 @@
 #ifndef USER_H
 #define USER_H
 
+#include <odb/core.hxx>
 #include <string>
 
+#pragma db object
 class User
 {
 public:
     User() = default;
-    User(int id, std::string name) : id(id), name(std::move(name)){};
+    User(int id_, std::string username_, std::string passwordHash_)
+        : id(id_), username(std::move(username_)), passwordHash(std::move(passwordHash_))
+    {
+    }
 
     int getId() const
     {
         return id;
-    };
-
-    std::string getName() const
+    }
+    std::string getUsername() const
     {
-        return name;
-    };
+        return username;
+    }
+    std::string getPasswordHash() const
+    {
+        return passwordHash;
+    }
 
 private:
-    int id;
-    std::string name;
+    friend class odb::access;
+
+#pragma db id
+    int id{};
+
+    std::string username;
+    std::string passwordHash;
 };
 
 #endif // USER_H

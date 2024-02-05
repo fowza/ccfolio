@@ -2,11 +2,21 @@ set(APP_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/main.cc")
 
 add_executable(${EXECUTABLE_NAME} ${APP_SOURCES})
 
+add_custom_command(TARGET ${EXECUTABLE_NAME} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy
+            "${PROJECT_SOURCE_DIR}/cert/server.crt"
+            "${PROJECT_BINARY_DIR}/cert/server.crt"
+    COMMAND ${CMAKE_COMMAND} -E copy
+            "${PROJECT_SOURCE_DIR}/cert/server.key"
+            "${PROJECT_BINARY_DIR}/cert/server.key"
+    COMMENT "Copying SSL certificates to build directory")
+
 target_link_libraries(
     ${EXECUTABLE_NAME}
     PRIVATE ${LIBRARY_NAME}
             nlohmann_json::nlohmann_json
             fmt::fmt
+            ${ODB_LIBRARIES}
             spdlog::spdlog
             cxxopts::cxxopts
             PkgConfig::Pistache )

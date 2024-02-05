@@ -35,7 +35,7 @@ public:
         using namespace Pistache::Rest;
 
         Routes::Post(router, "/users", Routes::bind(&UserController::handleCreateUser, this));
-        Routes::Get(router, "/users/:id", Routes::bind(&UserController::handleGetUser, this));
+        Routes::Get(router, "/users/:username", Routes::bind(&UserController::handleGetUserByUsername, this));
     }
 
     Pistache::Rest::Router &getRouter()
@@ -52,26 +52,17 @@ private:
      */
     void handleCreateUser(const Pistache::Rest::Request &request, Pistache::Http::ResponseWriter response)
     {
-        try
-        {
-            auto body = json::parse(request.body());
-            int id = body["id"];
-            std::string name = body["name"];
+        response.headers().add<Pistache::Http::Header::ContentType>(MIME(Application, Json));
 
-            User newUser = userService->CreateUser(User(id, name));
-            json responseJson = {{"id", newUser.getId()}, {"name", newUser.getName()}};
-
-            response.send(Pistache::Http::Code::Ok, responseJson.dump());
-        }
-        catch (const json::exception &e)
+        auto createUserResult = userService->CreateUser(request.body());
+        auto jsonResponse = createUserResult.toJson();
+        if (createUserResult.isSuccess)
         {
-            // Handle JSON parsing errors
-            response.send(Pistache::Http::Code::Bad_Request, "Invalid JSON format");
+            response.send(Pistache::Http::Code::Ok, jsonResponse.dump());
         }
-        catch (const std::exception &e)
+        else
         {
-            // Handle other exceptions
-            response.send(Pistache::Http::Code::Internal_Server_Error, e.what());
+            response.send(Pistache::Http::Code::Bad_Request, jsonResponse.dump());
         }
     }
 
@@ -81,31 +72,19 @@ private:
      * @param request
      * @param response
      */
-    void handleGetUser(const Pistache::Rest::Request &request, Pistache::Http::ResponseWriter response)
+    void handleGetUserByUsername(const Pistache::Rest::Request &request, Pistache::Http::ResponseWriter response)
     {
-        try
-        {
-            int id = std::stoi(request.param(":id").as<std::string>());
+        response.headers().add<Pistache::Http::Header::ContentType>(MIME(Application, Json));
 
-            auto user = userService->GetUser(id);
-            if (!user)
-            {
-                response.send(Pistache::Http::Code::Not_Found, "User not found");
-                return;
-            }
-
-            json responseJson = {{"id", user->getId()}, {"name", user->getName()}};
-            response.send(Pistache::Http::Code::Ok, responseJson.dump());
-        }
-        catch (const std::invalid_argument &e)
+        auto getUserResult = userService->GetUserByUsername(request.param(":username").as<std::string>());
+        auto jsonResponse = getUserResult.toJson();
+        if (getUserResult.isSuccess)
         {
-            // Handle invalid argument errors
-            response.send(Pistache::Http::Code::Bad_Request, "Invalid user ID");
+            response.send(Pistache::Http::Code::Ok, jsonResponse.dump());
         }
-        catch (const std::exception &e)
+        else
         {
-            // Handle other exceptions
-            response.send(Pistache::Http::Code::Internal_Server_Error, e.what());
+            response.send(Pistache::Http::Code::Bad_Request, jsonResponse.dump());
         }
     }
 

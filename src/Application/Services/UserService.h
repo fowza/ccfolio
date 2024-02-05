@@ -13,27 +13,94 @@
 #define USER_SERVICE_H
 
 #include "IUserRepository.h"
+#include "OperationResult.h"
+#include "ResponseDto.h"
 #include "User.h"
+#include "UserDto.h"
 #include <memory>
+#include <nlohmann/json.hpp>
+
+using json = nlohmann::json;
 
 class UserService
 {
 public:
-    UserService(std::shared_ptr<IUserRepository> userRepository) : userRepository(std::move(userRepository)){};
-
-    User CreateUser(const User &user)
+    UserService(std::shared_ptr<IUserRepository> userRepository) : userRepository(std::move(userRepository))
     {
-        userRepository->createUser(user);
-        return user;
-    };
+    }
 
-    std::optional<User> GetUser(int userId)
+    /**
+     * @brief Create a new user
+     *
+     * @param request JSON payload with user data
+     * @return ResponseDto<UserDto>
+     */
+    ResponseDto<UserDto> CreateUser(const std::string &request)
     {
-        return userRepository->getUser(userId);
+        try
+        {
+            auto jsonPayload = json::parse(request);
+            int id = jsonPayload["id"];
+            std::string username = jsonPayload["username"];
+            User newUser(id, username, "password123");
+
+            auto creationResult = userRepository->createUser(newUser);
+
+            if (creationResult.IsSuccess())
+            {
+                UserDto userDto{creationResult.GetResult().getUsername()};
+                return ResponseDto<UserDto>::Success(userDto);
+            }
+            else
+            {
+                return ResponseDto<UserDto>::Failure(creationResult.GetErrorMessage());
+            }
+        }
+        catch (const json::exception &e)
+        {
+            return ResponseDto<UserDto>::Failure("Invalid JSON format");
+        }
+        catch (const std::exception &e)
+        {
+            return ResponseDto<UserDto>::Failure(e.what());
+        }
+    }
+
+    /**
+     * @brief Get a user by username
+     *
+     * @param username
+     * @return ResponseDto<UserDto>
+     */
+    ResponseDto<UserDto> GetUserByUsername(const std::string &username)
+    {
+        try
+        {
+            auto getResult = userRepository->getUserByUsername(username);
+
+            if (getResult.IsSuccess())
+            {
+                UserDto userDto{getResult.GetResult()->getUsername()};
+                return ResponseDto<UserDto>::Success(userDto);
+            }
+            else
+            {
+                return ResponseDto<UserDto>::Failure(getResult.GetErrorMessage());
+            }
+        }
+        catch (const json::exception &e)
+        {
+            return ResponseDto<UserDto>::Failure("Invalid JSON format");
+        }
+        catch (const std::exception &e)
+        {
+            return ResponseDto<UserDto>::Failure(e.what());
+        }
     }
 
 private:
     std::shared_ptr<IUserRepository> userRepository;
 };
+
 
 #endif // USER_SERVICE_H

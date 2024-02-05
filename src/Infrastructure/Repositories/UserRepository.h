@@ -13,39 +13,75 @@
 #define USER_REPOSITORY_H
 
 #include "IUserRepository.h"
-#include <unordered_map>
+#include "OdbRepository.h"
+#include "OperationResult.h"
+#include "odb/transaction.hxx"
+#include <optional>
 
 class UserRepository : public IUserRepository
 {
+private:
+    std::shared_ptr<OdbRepository<User>> dbConnector;
+
 public:
+    UserRepository(std::shared_ptr<OdbRepository<User>> dbConnector) : dbConnector(std::move(dbConnector))
+    {
+    }
+
     /**
      * @brief Create a new user
      *
-     * @param user
+     * @param user User to create
+     * @return OperationResult<User>
      */
-    void createUser(const User &user) override
+    OperationResult<User> createUser(const User &user) override
     {
-        users[user.getId()] = user;
+        try
+        {
+            auto userCreated = dbConnector->Create(user);
+
+            if (!userCreated.IsSuccess())
+            {
+                return OperationResult<User>::FailureResult("Failed to create user");
+            }
+
+            return OperationResult<User>::SuccessResult(user);
+        }
+        catch (const odb::exception &e)
+        {
+            return OperationResult<User>::FailureResult(e.what());
+        }
     }
 
     /**
-     * @brief Get a user by id
+     * @brief Get a user by username
      *
-     * @param id The id of the user
-     * @return std::optional<User> The user if found, otherwise std::nullopt
+     * @param username Username of the user
+     * @return OperationResult<std::optional<User>>
      */
-    std::optional<User> getUser(int id) override
+    OperationResult<std::optional<User>> getUserByUsername(const std::string &username) override
     {
-        auto it = users.find(id);
-        if (it != users.end())
+        try
         {
-            return it->second;
-        }
-        return std::nullopt;
-    }
+            odb::core::transaction t(dbConnector->database()->begin());
+            typedef odb::query<User> Query;
+            typedef odb::result<User> Result;
+            Result r = dbConnector->database()->query<User>(Query::username == username);
 
-private:
-    std::unordered_map<int, User> users;
+            for (auto &user : r)
+            {
+                t.commit();
+                return OperationResult<std::optional<User>>::SuccessResult(user);
+            }
+
+            return OperationResult<std::optional<User>>::FailureResult("Failed to find user");
+        }
+        catch (const std::exception &e)
+        {
+            return OperationResult<std::optional<User>>::FailureResult(e.what());
+        }
+    }
 };
+
 
 #endif // USER_REPOSITORY_H
