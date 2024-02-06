@@ -9,6 +9,7 @@ target_include_directories(DomainLib PUBLIC
 
 target_link_libraries(DomainLib
     PUBLIC
+    CoreLib
     nlohmann_json::nlohmann_json
     fmt::fmt
     spdlog::spdlog

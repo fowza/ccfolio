@@ -9,6 +9,7 @@ DomainLib
 nlohmann_json::nlohmann_json
 ${ODB_LIBRARIES}
 fmt::fmt
+CoreLib
 spdlog::spdlog
 cxxopts::cxxopts
 PkgConfig::Pistache)

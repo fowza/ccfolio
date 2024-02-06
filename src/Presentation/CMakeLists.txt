@@ -4,6 +4,7 @@ target_include_directories(PresentationLib INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}
 target_link_libraries(PresentationLib INTERFACE
     ApplicationLib
     InfrastructureLib
+    CoreLib
     nlohmann_json::nlohmann_json
     fmt::fmt
     spdlog::spdlog

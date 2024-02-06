@@ -6,6 +6,7 @@ target_include_directories(ApplicationLib INTERFACE
     ${CMAKE_CURRENT_SOURCE_DIR}/Services)
 target_link_libraries(ApplicationLib INTERFACE
     DomainLib
+    CoreLib
     nlohmann_json::nlohmann_json
     fmt::fmt
     spdlog::spdlog

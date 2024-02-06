@@ -13,6 +13,7 @@
 #define USER_SERVICE_H
 
 #include "IUserRepository.h"
+#include "LogService.h"
 #include "OperationResult.h"
 #include "ResponseDto.h"
 #include "User.h"
@@ -53,15 +54,18 @@ public:
             }
             else
             {
+                LOG(LogService::LogLevel::INFO, creationResult.GetErrorMessage());
                 return ResponseDto<UserDto>::Failure(creationResult.GetErrorMessage());
             }
         }
         catch (const json::exception &e)
         {
+            LOG(LogService::LogLevel::ERROR, e.what());
             return ResponseDto<UserDto>::Failure("Invalid JSON format");
         }
         catch (const std::exception &e)
         {
+            LOG(LogService::LogLevel::ERROR, e.what());
             return ResponseDto<UserDto>::Failure(e.what());
         }
     }
@@ -85,15 +89,18 @@ public:
             }
             else
             {
+                LOG(LogService::LogLevel::INFO, getResult.GetErrorMessage());
                 return ResponseDto<UserDto>::Failure(getResult.GetErrorMessage());
             }
         }
         catch (const json::exception &e)
         {
+            LOG(LogService::LogLevel::ERROR, e.what());
             return ResponseDto<UserDto>::Failure("Invalid JSON format");
         }
         catch (const std::exception &e)
         {
+            LOG(LogService::LogLevel::ERROR, e.what());
             return ResponseDto<UserDto>::Failure(e.what());
         }
     }

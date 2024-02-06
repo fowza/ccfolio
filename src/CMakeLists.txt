@@ -1,3 +1,4 @@
+add_subdirectory(Core)
 add_subdirectory(Domain)
 add_subdirectory(Application)
 add_subdirectory(Infrastructure)
@@ -7,6 +8,7 @@ add_library(${LIBRARY_NAME} INTERFACE)
 
 target_link_libraries(${LIBRARY_NAME}
 INTERFACE
+        CoreLib
         DomainLib
         ApplicationLib
         InfrastructureLib

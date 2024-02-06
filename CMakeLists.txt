@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.18)
 
 project(
-    "CppTemplate"
+    "ccfolio"
     VERSION 1.0.0
     LANGUAGES C CXX)
 
