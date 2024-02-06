@@ -15,6 +15,7 @@
 #pragma once
 
 #include "IRepository.h"
+#include "LogService.h"
 #include "OperationResult.h"
 #include "User-odb.hxx"
 #include <memory>
@@ -51,10 +52,12 @@ public:
         }
         catch (const odb::connection_lost &e)
         {
+            LOG(LogService::LogLevel::ERROR, e.what());
             return OperationResult<bool>::FailureResult(e.what());
         }
         catch (const std::exception &e)
         {
+            LOG(LogService::LogLevel::ERROR, e.what());
             return OperationResult<bool>::FailureResult(e.what());
         }
     }
@@ -76,10 +79,12 @@ public:
         }
         catch (const odb::connection_lost &e)
         {
+            LOG(LogService::LogLevel::ERROR, e.what());
             return OperationResult<T>::FailureResult(e.what());
         }
         catch (const std::exception &e)
         {
+            LOG(LogService::LogLevel::ERROR, e.what());
             return OperationResult<T>::FailureResult(e.what());
         }
     }
@@ -101,10 +106,12 @@ public:
         }
         catch (const odb::connection_lost &e)
         {
+            LOG(LogService::LogLevel::ERROR, e.what());
             return OperationResult<bool>::FailureResult(e.what());
         }
         catch (const std::exception &e)
         {
+            LOG(LogService::LogLevel::ERROR, e.what());
             return OperationResult<bool>::FailureResult(e.what());
         }
     }
@@ -126,10 +133,12 @@ public:
         }
         catch (const odb::connection_lost &e)
         {
+            LOG(LogService::LogLevel::ERROR, e.what());
             return OperationResult<bool>::FailureResult(e.what());
         }
         catch (const std::exception &e)
         {
+            LOG(LogService::LogLevel::ERROR, e.what());
             return OperationResult<bool>::FailureResult(e.what());
         }
     }
@@ -155,10 +164,12 @@ public:
         }
         catch (const odb::connection_lost &e)
         {
+            LOG(LogService::LogLevel::ERROR, e.what());
             return OperationResult<std::vector<T>>::FailureResult(e.what());
         }
         catch (const std::exception &e)
         {
+            LOG(LogService::LogLevel::ERROR, e.what());
             return OperationResult<std::vector<T>>::FailureResult(e.what());
         }
     }

@@ -56,5 +56,4 @@ public:
     }
 };
 
-
 #endif // RESPONSE_DTO_H

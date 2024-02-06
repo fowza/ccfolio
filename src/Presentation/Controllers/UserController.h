@@ -12,6 +12,7 @@
 #ifndef USER_CONTROLLER_H
 #define USER_CONTROLLER_H
 
+#include "LogService.h"
 #include "UserService.h"
 #include <nlohmann/json.hpp>
 #include <pistache/router.h>
@@ -52,17 +53,24 @@ private:
      */
     void handleCreateUser(const Pistache::Rest::Request &request, Pistache::Http::ResponseWriter response)
     {
-        response.headers().add<Pistache::Http::Header::ContentType>(MIME(Application, Json));
+        try
+        {
+            response.headers().add<Pistache::Http::Header::ContentType>(MIME(Application, Json));
 
-        auto createUserResult = userService->CreateUser(request.body());
-        auto jsonResponse = createUserResult.toJson();
-        if (createUserResult.isSuccess)
-        {
-            response.send(Pistache::Http::Code::Ok, jsonResponse.dump());
+            auto createUserResult = userService->CreateUser(request.body());
+            auto jsonResponse = createUserResult.toJson();
+            if (createUserResult.isSuccess)
+            {
+                response.send(Pistache::Http::Code::Ok, jsonResponse.dump());
+            }
+            else
+            {
+                response.send(Pistache::Http::Code::Bad_Request, jsonResponse.dump());
+            }
         }
-        else
+        catch (const std::exception &e)
         {
-            response.send(Pistache::Http::Code::Bad_Request, jsonResponse.dump());
+            LOG(LogService::LogLevel::ERROR, e.what());
         }
     }
 
@@ -74,17 +82,24 @@ private:
      */
     void handleGetUserByUsername(const Pistache::Rest::Request &request, Pistache::Http::ResponseWriter response)
     {
-        response.headers().add<Pistache::Http::Header::ContentType>(MIME(Application, Json));
+        try
+        {
+            response.headers().add<Pistache::Http::Header::ContentType>(MIME(Application, Json));
 
-        auto getUserResult = userService->GetUserByUsername(request.param(":username").as<std::string>());
-        auto jsonResponse = getUserResult.toJson();
-        if (getUserResult.isSuccess)
-        {
-            response.send(Pistache::Http::Code::Ok, jsonResponse.dump());
+            auto getUserResult = userService->GetUserByUsername(request.param(":username").as<std::string>());
+            auto jsonResponse = getUserResult.toJson();
+            if (getUserResult.isSuccess)
+            {
+                response.send(Pistache::Http::Code::Ok, jsonResponse.dump());
+            }
+            else
+            {
+                response.send(Pistache::Http::Code::Bad_Request, jsonResponse.dump());
+            }
         }
-        else
+        catch (const std::exception &e)
         {
-            response.send(Pistache::Http::Code::Bad_Request, jsonResponse.dump());
+            LOG(LogService::LogLevel::ERROR, e.what());
         }
     }
 

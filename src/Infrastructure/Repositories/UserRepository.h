@@ -16,6 +16,7 @@
 #include "OdbRepository.h"
 #include "OperationResult.h"
 #include "odb/transaction.hxx"
+#include <fmt/format.h>
 #include <optional>
 
 class UserRepository : public IUserRepository
@@ -42,13 +43,15 @@ public:
 
             if (!userCreated.IsSuccess())
             {
-                return OperationResult<User>::FailureResult("Failed to create user");
+                return OperationResult<User>::FailureResult(
+                    fmt::format("Failed to create user with username: {0}", user.getUsername()));
             }
 
             return OperationResult<User>::SuccessResult(user);
         }
         catch (const odb::exception &e)
         {
+            LOG(LogService::LogLevel::ERROR, e.what());
             return OperationResult<User>::FailureResult(e.what());
         }
     }
@@ -74,10 +77,12 @@ public:
                 return OperationResult<std::optional<User>>::SuccessResult(user);
             }
 
-            return OperationResult<std::optional<User>>::FailureResult("Failed to find user");
+            return OperationResult<std::optional<User>>::FailureResult(
+                fmt::format("Failed to find user with username: {0}", username));
         }
         catch (const std::exception &e)
         {
+            LOG(LogService::LogLevel::ERROR, e.what());
             return OperationResult<std::optional<User>>::FailureResult(e.what());
         }
     }
