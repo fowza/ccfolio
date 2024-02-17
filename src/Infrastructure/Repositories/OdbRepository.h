@@ -41,7 +41,7 @@ public:
      * @param entity Entity to create
      * @return OperationResult<bool>
      */
-    OperationResult<bool> Create(const T &entity) override
+    OperationResult<bool> Create(T entity) override
     {
         try
         {

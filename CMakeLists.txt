@@ -68,6 +68,7 @@ cpmaddpackage("gh:nlohmann/json@3.11.2")
 cpmaddpackage("gh:catchorg/Catch2@2.13.9")
 cpmaddpackage("gh:jarro2783/cxxopts@3.1.1")
 cpmaddpackage("gh:gabime/spdlog@1.11.0")
+cpmaddpackage("gh:Thalhammer/jwt-cpp@0.7.0")
 
 find_package(ODB REQUIRED
     COMPONENTS mysql sqlite)
@@ -75,6 +76,9 @@ include(${ODB_USE_FILE})
 
 find_package(PkgConfig)
 pkg_check_modules(Pistache REQUIRED IMPORTED_TARGET libpistache)
+
+find_package(PkgConfig)
+pkg_check_modules(ARGON2 REQUIRED libargon2)
 
 # SUB DIRECTORIES
 add_subdirectory(configured)

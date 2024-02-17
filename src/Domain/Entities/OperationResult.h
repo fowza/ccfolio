@@ -43,7 +43,7 @@ public:
      * @param errorMessage Error message if the operation failed
      */
     explicit OperationResult(OperationStatus status, T result = T(), std::string errorMessage = "")
-        : status(status), result(std::move(result)), errorMessage(std::move(errorMessage))
+        : _status(status), result(std::move(result)), errorMessage(std::move(errorMessage))
     {
     }
 
@@ -76,7 +76,7 @@ public:
      */
     bool IsSuccess() const
     {
-        return status == OperationStatus::Success;
+        return _status == OperationStatus::Success;
     }
 
     /**
@@ -103,7 +103,7 @@ public:
     }
 
 private:
-    OperationStatus status;
+    OperationStatus _status;
     T result;
     std::string errorMessage;
 };

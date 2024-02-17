@@ -2,9 +2,9 @@ name: Ubuntu CI Test
 
 on:
   push:
-    branches: [ main, master, dev ]
+    branches: [ main, master, develop ]
   pull_request:
-    branches: [ main, master, dev ]
+    branches: [ main, master, develop ]
 
 jobs:
   build:
@@ -13,7 +13,7 @@ jobs:
     - uses: actions/checkout@v2
     - name: install
       run: |
-        sudo add-apt-repository ppa:pistache+team/unstable && sudo apt update && sudo apt install -y libpistache-dev odb gcovr lcov libsqlite3-dev
+        sudo add-apt-repository ppa:pistache+team/unstable && sudo apt update && sudo apt install -y libpistache-dev odb gcovr lcov libsqlite3-dev libargon2-dev
     - name: prepare
       run: |
         make prepare

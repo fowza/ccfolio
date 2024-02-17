@@ -35,8 +35,8 @@ public:
     {
         using namespace Pistache::Rest;
 
-        Routes::Post(router, "/users", Routes::bind(&UserController::handleCreateUser, this));
-        Routes::Get(router, "/users/:username", Routes::bind(&UserController::handleGetUserByUsername, this));
+        Routes::Post(router, "/user/create", Routes::bind(&UserController::handleCreateUser, this));
+        Routes::Post(router, "/user/login", Routes::bind(&UserController::handleUserLogin, this));
     }
 
     Pistache::Rest::Router &getRouter()
@@ -80,13 +80,13 @@ private:
      * @param request
      * @param response
      */
-    void handleGetUserByUsername(const Pistache::Rest::Request &request, Pistache::Http::ResponseWriter response)
+    void handleUserLogin(const Pistache::Rest::Request &request, Pistache::Http::ResponseWriter response)
     {
         try
         {
             response.headers().add<Pistache::Http::Header::ContentType>(MIME(Application, Json));
 
-            auto getUserResult = userService->GetUserByUsername(request.param(":username").as<std::string>());
+            auto getUserResult = userService->UserLogin(request.body());
             auto jsonResponse = getUserResult.toJson();
             if (getUserResult.isSuccess)
             {
