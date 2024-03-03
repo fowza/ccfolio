@@ -14,6 +14,7 @@
 
 #include "LogService.h"
 #include "UserService.h"
+#include <jwt-cpp/jwt.h>
 #include <nlohmann/json.hpp>
 #include <pistache/router.h>
 
@@ -22,7 +23,8 @@ using json = nlohmann::json;
 class UserController
 {
 public:
-    UserController(std::shared_ptr<UserService> userService) : userService(std::move(userService))
+    UserController(std::shared_ptr<UserService> userService, Pistache::Rest::Router &router)
+        : userService(std::move(userService)), router(router)
     {
         setupRoutes();
     }
@@ -37,11 +39,6 @@ public:
 
         Routes::Post(router, "/user/create", Routes::bind(&UserController::handleCreateUser, this));
         Routes::Post(router, "/user/login", Routes::bind(&UserController::handleUserLogin, this));
-    }
-
-    Pistache::Rest::Router &getRouter()
-    {
-        return router;
     }
 
 private:
@@ -104,7 +101,7 @@ private:
     }
 
     std::shared_ptr<UserService> userService;
-    Pistache::Rest::Router router;
+    Pistache::Rest::Router &router;
 };
 
 #endif // USER_CONTROLLER_H

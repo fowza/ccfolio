@@ -19,8 +19,10 @@
 #include "User.h"
 #include "UserDto.h"
 #include "Utility.h"
+#include "config.hpp"
 #include <argon2.h>
 #include <fmt/format.h>
+#include <jwt-cpp/jwt.h>
 #include <memory>
 #include <nlohmann/json.hpp>
 #include <random>
@@ -59,6 +61,7 @@ public:
             if (creationResult.IsSuccess())
             {
                 UserDto userDto{username};
+                userDto.token = CreateJWTToken(userDto);
                 return ResponseDto<UserDto>::Success(userDto);
             }
             else
@@ -111,6 +114,7 @@ public:
             }
 
             UserDto userDto{userResult.GetResult()->getUsername()};
+            userDto.token = CreateJWTToken(userDto);
             return ResponseDto<UserDto>::Success(userDto);
         }
         catch (const json::exception &e)
@@ -128,94 +132,184 @@ public:
 private:
     std::shared_ptr<IUserRepository> userRepository;
 
+    /**
+     * @brief Create a JWT token for a user
+     *
+     * @param userDto The user to create the token for
+     * @return std::string The JWT token
+     */
+    const std::string CreateJWTToken(UserDto &userDto)
+    {
+        try
+        {
+            const std::string secretKey = std::string(secret_key);
+            const std::string issuer = std::string(project_name);
+            auto now = std::chrono::system_clock::now();
+            auto expTime = now + std::chrono::minutes(3);
+
+            auto token = jwt::create()
+                             .set_type("JWS")
+                             .set_issuer(issuer)
+                             .set_issued_at(now)
+                             .set_expires_at(expTime)
+                             .set_payload_claim("username", jwt::claim(userDto.username))
+                             .sign(jwt::algorithm::hs256{secretKey});
+
+            return std::string(token);
+        }
+        catch (const std::exception &e)
+        {
+            LOG(LogService::LogLevel::ERROR, e.what());
+            throw std::runtime_error("Error while trying to create JWT token");
+        }
+    }
+
+    /**
+     * @brief Generate a random salt for hashing
+     *
+     * @param length The length of the salt
+     * @return std::vector<uint8_t> The generated salt
+     */
     std::vector<uint8_t> generateRandomSalt(size_t length)
     {
-        std::vector<uint8_t> salt(length);
-        std::random_device rd;
-        std::mt19937 gen(rd());
-        std::uniform_int_distribution<> dist(0, 255);
-
-        for (auto &byte : salt)
+        try
         {
-            byte = static_cast<uint8_t>(dist(gen));
-        }
+            std::vector<uint8_t> salt(length);
+            std::random_device rd;
+            std::mt19937 gen(rd());
+            std::uniform_int_distribution<> dist(0, 255);
 
-        return salt;
+            for (auto &byte : salt)
+            {
+                byte = static_cast<uint8_t>(dist(gen));
+            }
+
+            return salt;
+        }
+        catch (const std::exception &e)
+        {
+            LOG(LogService::LogLevel::ERROR, e.what());
+            throw std::runtime_error("Error while trying to generate random salt");
+        }
     }
 
+    /**
+     * @brief Hash a password with Argon2
+     *
+     * @param password The password to hash
+     * @return std::pair<std::string, std::vector<uint8_t>> The hashed password and the salt
+     */
     std::pair<std::string, std::vector<uint8_t>> hashPasswordWithArgon2(const std::string &password)
     {
-        auto salt = generateRandomSalt(16);
-
-        const uint32_t t_cost = 2;
-        const uint32_t m_cost = (1 << 16);
-        const uint32_t parallelism = 1;
-
-        std::vector<uint8_t> hashRaw(32);
-
-        int result = argon2i_hash_raw(t_cost,
-                                      m_cost,
-                                      parallelism,
-                                      password.data(),
-                                      password.size(),
-                                      salt.data(),
-                                      salt.size(),
-                                      hashRaw.data(),
-                                      hashRaw.size());
-        if (result != ARGON2_OK)
+        try
         {
-            throw std::runtime_error("Hashing failed with Argon2");
-        }
+            auto salt = generateRandomSalt(16);
 
-        std::stringstream hexStream;
-        for (auto byte : hashRaw)
+            const uint32_t t_cost = 2;
+            const uint32_t m_cost = (1 << 16);
+            const uint32_t parallelism = 1;
+
+            std::vector<uint8_t> hashRaw(32);
+
+            int result = argon2i_hash_raw(t_cost,
+                                          m_cost,
+                                          parallelism,
+                                          password.data(),
+                                          password.size(),
+                                          salt.data(),
+                                          salt.size(),
+                                          hashRaw.data(),
+                                          hashRaw.size());
+            if (result != ARGON2_OK)
+            {
+                throw std::runtime_error("Hashing failed with Argon2");
+            }
+
+            std::stringstream hexStream;
+            for (auto byte : hashRaw)
+            {
+                hexStream << std::hex << std::setfill('0') << std::setw(2) << (int)byte;
+            }
+
+            return {hexStream.str(), salt};
+        }
+        catch (const std::exception &e)
         {
-            hexStream << std::hex << std::setfill('0') << std::setw(2) << (int)byte;
+            LOG(LogService::LogLevel::ERROR, e.what());
+            throw std::runtime_error("Error while trying to hash password with Argon2");
         }
-
-        return {hexStream.str(), salt};
     }
 
+    /**
+     * @brief Verify a user's password with Argon2
+     *
+     * @param user The user to verify the password for
+     * @param password The password to verify against the user's password
+     * @return bool True if the password is correct, false otherwise
+     */
     bool verifyUserPassword(const User &user, const std::string &password)
     {
-        std::string storedHash = user.getPasswordHash();
-        std::vector<uint8_t> salt(Utility::fromHexString(user.getSalt()));
+        try
+        {
+            std::string storedHash = user.getPasswordHash();
+            std::vector<uint8_t> salt(Utility::fromHexString(user.getSalt()));
 
-        return verifyPasswordWithArgon2(password, storedHash, salt);
+            return verifyPasswordWithArgon2(password, storedHash, salt);
+        }
+        catch (const std::exception &e)
+        {
+            LOG(LogService::LogLevel::ERROR, e.what());
+            throw std::runtime_error("Error while trying to verify user password");
+        }
     }
 
-
+    /**
+     * @brief Verify a password with Argon2
+     *
+     * @param password The password to verify
+     * @param hashHex The hash to verify against
+     * @param salt The salt to use
+     * @return bool True if the password is correct, false otherwise
+     */
     bool verifyPasswordWithArgon2(const std::string &password,
                                   const std::string &hashHex,
                                   const std::vector<uint8_t> &salt)
     {
-        const uint32_t t_cost = 2;
-        const uint32_t m_cost = (1 << 16);
-        const uint32_t parallelism = 1;
-
-        std::vector<uint8_t> hashRaw(32);
-
-        int result = argon2i_hash_raw(t_cost,
-                                      m_cost,
-                                      parallelism,
-                                      password.data(),
-                                      password.size(),
-                                      salt.data(),
-                                      salt.size(),
-                                      hashRaw.data(),
-                                      hashRaw.size());
-        if (result != ARGON2_OK)
+        try
         {
-            throw std::runtime_error("Hashing failed with Argon2");
-        }
+            const uint32_t t_cost = 2;
+            const uint32_t m_cost = (1 << 16);
+            const uint32_t parallelism = 1;
 
-        std::stringstream hexStream;
-        for (auto byte : hashRaw)
+            std::vector<uint8_t> hashRaw(32);
+
+            int result = argon2i_hash_raw(t_cost,
+                                          m_cost,
+                                          parallelism,
+                                          password.data(),
+                                          password.size(),
+                                          salt.data(),
+                                          salt.size(),
+                                          hashRaw.data(),
+                                          hashRaw.size());
+            if (result != ARGON2_OK)
+            {
+                throw std::runtime_error("Hashing failed with Argon2");
+            }
+
+            std::stringstream hexStream;
+            for (auto byte : hashRaw)
+            {
+                hexStream << std::hex << std::setfill('0') << std::setw(2) << (int)byte;
+            }
+
+            return hexStream.str() == hashHex;
+        }
+        catch (const std::exception &e)
         {
-            hexStream << std::hex << std::setfill('0') << std::setw(2) << (int)byte;
+            LOG(LogService::LogLevel::ERROR, e.what());
+            throw std::runtime_error("Error while trying to verify password with Argon2");
         }
-
-        return hexStream.str() == hashHex;
     }
 };
 
