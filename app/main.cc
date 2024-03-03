@@ -1,4 +1,5 @@
 #include "OdbRepository.h"
+#include "TestController.h"
 #include "User-odb.hxx"
 #include "UserController.h"
 #include "UserRepository.h"
@@ -8,6 +9,7 @@
 #include <odb/sqlite/database.hxx>
 #include <odb/transaction.hxx>
 #include <pistache/endpoint.h>
+#include <pistache/router.h>
 
 int main()
 {
@@ -22,14 +24,18 @@ int main()
     auto userRepository = std::make_shared<UserRepository>(std::make_shared<OdbRepository<User>>(db));
     auto userService = std::make_shared<UserService>(userRepository);
 
+    // Create router object
+    Pistache::Rest::Router router;
+
     // Create the controllers
-    UserController userController(userService);
+    UserController userController(userService, router);
+    TestController testController(router);
 
     // Create the server
     Pistache::Http::Endpoint server(Pistache::Address(Pistache::Ipv4::any(), Pistache::Port(7001)));
     auto opts = Pistache::Http::Endpoint::options().threads(1);
     server.init(opts);
-    server.setHandler(userController.getRouter().handler());
+    server.setHandler(router.handler());
     server.useSSL("../cert/server.crt", "../cert/server.key");
     server.serve();
 }

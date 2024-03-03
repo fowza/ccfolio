@@ -14,6 +14,7 @@
 
 #include "LogService.h"
 #include "UserService.h"
+#include <jwt-cpp/jwt.h>
 #include <nlohmann/json.hpp>
 #include <pistache/router.h>
 
@@ -22,7 +23,8 @@ using json = nlohmann::json;
 class UserController
 {
 public:
-    UserController(std::shared_ptr<UserService> userService) : userService(std::move(userService))
+    UserController(std::shared_ptr<UserService> userService, Pistache::Rest::Router &router)
+        : userService(std::move(userService)), router(router)
     {
         setupRoutes();
     }
@@ -35,13 +37,8 @@ public:
     {
         using namespace Pistache::Rest;
 
-        Routes::Post(router, "/users", Routes::bind(&UserController::handleCreateUser, this));
-        Routes::Get(router, "/users/:username", Routes::bind(&UserController::handleGetUserByUsername, this));
-    }
-
-    Pistache::Rest::Router &getRouter()
-    {
-        return router;
+        Routes::Post(router, "/user/create", Routes::bind(&UserController::handleCreateUser, this));
+        Routes::Post(router, "/user/login", Routes::bind(&UserController::handleUserLogin, this));
     }
 
 private:
@@ -80,13 +77,13 @@ private:
      * @param request
      * @param response
      */
-    void handleGetUserByUsername(const Pistache::Rest::Request &request, Pistache::Http::ResponseWriter response)
+    void handleUserLogin(const Pistache::Rest::Request &request, Pistache::Http::ResponseWriter response)
     {
         try
         {
             response.headers().add<Pistache::Http::Header::ContentType>(MIME(Application, Json));
 
-            auto getUserResult = userService->GetUserByUsername(request.param(":username").as<std::string>());
+            auto getUserResult = userService->UserLogin(request.body());
             auto jsonResponse = getUserResult.toJson();
             if (getUserResult.isSuccess)
             {
@@ -104,7 +101,7 @@ private:
     }
 
     std::shared_ptr<UserService> userService;
-    Pistache::Rest::Router router;
+    Pistache::Rest::Router &router;
 };
 
 #endif // USER_CONTROLLER_H

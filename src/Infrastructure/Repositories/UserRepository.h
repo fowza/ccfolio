@@ -16,8 +16,14 @@
 #include "OdbRepository.h"
 #include "OperationResult.h"
 #include "odb/transaction.hxx"
+#include <argon2.h>
+#include <cstring>
 #include <fmt/format.h>
+#include <iostream>
 #include <optional>
+#include <random>
+#include <sstream>
+#include <vector>
 
 class UserRepository : public IUserRepository
 {
@@ -35,16 +41,23 @@ public:
      * @param user User to create
      * @return OperationResult<User>
      */
-    OperationResult<User> createUser(const User &user) override
+    OperationResult<User> createUser(User user) override
     {
         try
         {
-            auto userCreated = dbConnector->Create(user);
+            auto userExist = getUserByUsername(user.getUsername());
 
+            if (userExist.IsSuccess())
+            {
+                return OperationResult<User>::FailureResult(
+                    fmt::format("User with username: {0} already exist.", user.getUsername()));
+            }
+
+            auto userCreated = dbConnector->Create(user);
             if (!userCreated.IsSuccess())
             {
                 return OperationResult<User>::FailureResult(
-                    fmt::format("Failed to create user with username: {0}", user.getUsername()));
+                    fmt::format("Failed to create user with username: {}", user.getUsername()));
             }
 
             return OperationResult<User>::SuccessResult(user);

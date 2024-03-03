@@ -24,7 +24,7 @@ public:
     virtual ~IUserRepository() = default;
 
     virtual OperationResult<std::optional<User>> getUserByUsername(const std::string &username) = 0;
-    virtual OperationResult<User> createUser(const User &user) = 0;
+    virtual OperationResult<User> createUser(User user) = 0;
 };
 
 #endif // IUSER_REPOSITORY_H

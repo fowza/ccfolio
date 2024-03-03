@@ -19,6 +19,7 @@ using json = nlohmann::json;
 struct UserDto
 {
     std::string username;
+    std::string token;
 
     /**
      * @brief Convert the user dto to a json object
@@ -29,6 +30,7 @@ struct UserDto
     {
         json j;
         j["username"] = username;
+        j["token"] = token;
         return j;
     }
 };

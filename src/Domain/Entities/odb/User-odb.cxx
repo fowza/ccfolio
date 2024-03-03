@@ -39,6 +39,20 @@ struct access::object_traits_impl<::User, id_sqlite>::extra_statement_cache_type
 };
 
 access::object_traits_impl<::User, id_sqlite>::id_type access::object_traits_impl<::User, id_sqlite>::id(
+    const id_image_type &i)
+{
+    sqlite::database *db(0);
+    ODB_POTENTIALLY_UNUSED(db);
+
+    id_type id;
+    {
+        sqlite::value_traits<int, sqlite::id_integer>::set_value(id, i.id_value, i.id_null);
+    }
+
+    return id;
+}
+
+access::object_traits_impl<::User, id_sqlite>::id_type access::object_traits_impl<::User, id_sqlite>::id(
     const image_type &i)
 {
     sqlite::database *db(0);
@@ -79,6 +93,14 @@ bool access::object_traits_impl<::User, id_sqlite>::grow(image_type &i, bool *t)
         grew = true;
     }
 
+    // salt
+    //
+    if (t[3UL])
+    {
+        i.salt_value.capacity(i.salt_size);
+        grew = true;
+    }
+
     return grew;
 }
 
@@ -116,6 +138,15 @@ void access::object_traits_impl<::User, id_sqlite>::bind(sqlite::bind *b, image_
     b[n].size = &i.passwordHash_size;
     b[n].capacity = i.passwordHash_value.capacity();
     b[n].is_null = &i.passwordHash_null;
+    n++;
+
+    // salt
+    //
+    b[n].type = sqlite::image_traits<::std::string, sqlite::id_text>::bind_value;
+    b[n].buffer = i.salt_value.data();
+    b[n].size = &i.salt_size;
+    b[n].capacity = i.salt_value.capacity();
+    b[n].is_null = &i.salt_null;
     n++;
 }
 
@@ -175,6 +206,18 @@ bool access::object_traits_impl<::User, id_sqlite>::init(image_type &i, const ob
         grew = grew || (cap != i.passwordHash_value.capacity());
     }
 
+    // salt
+    //
+    {
+        ::std::string const &v = o.salt;
+
+        bool is_null(false);
+        std::size_t cap(i.salt_value.capacity());
+        sqlite::value_traits<::std::string, sqlite::id_text>::set_image(i.salt_value, i.salt_size, is_null, v);
+        i.salt_null = is_null;
+        grew = grew || (cap != i.salt_value.capacity());
+    }
+
     return grew;
 }
 
@@ -213,6 +256,14 @@ void access::object_traits_impl<::User, id_sqlite>::init(object_type &o, const i
                                                                         i.passwordHash_size,
                                                                         i.passwordHash_null);
     }
+
+    // salt
+    //
+    {
+        ::std::string &v = o.salt;
+
+        sqlite::value_traits<::std::string, sqlite::id_text>::set_value(v, i.salt_value, i.salt_size, i.salt_null);
+    }
 }
 
 void access::object_traits_impl<::User, id_sqlite>::init(id_image_type &i, const id_type &id)
@@ -227,21 +278,24 @@ void access::object_traits_impl<::User, id_sqlite>::init(id_image_type &i, const
 const char access::object_traits_impl<::User, id_sqlite>::persist_statement[] = "INSERT INTO \"User\" "
                                                                                 "(\"id\", "
                                                                                 "\"username\", "
-                                                                                "\"passwordHash\") "
+                                                                                "\"passwordHash\", "
+                                                                                "\"salt\") "
                                                                                 "VALUES "
-                                                                                "(?, ?, ?)";
+                                                                                "(?, ?, ?, ?)";
 
 const char access::object_traits_impl<::User, id_sqlite>::find_statement[] = "SELECT "
                                                                              "\"User\".\"id\", "
                                                                              "\"User\".\"username\", "
-                                                                             "\"User\".\"passwordHash\" "
+                                                                             "\"User\".\"passwordHash\", "
+                                                                             "\"User\".\"salt\" "
                                                                              "FROM \"User\" "
                                                                              "WHERE \"User\".\"id\"=?";
 
 const char access::object_traits_impl<::User, id_sqlite>::update_statement[] = "UPDATE \"User\" "
                                                                                "SET "
                                                                                "\"username\"=?, "
-                                                                               "\"passwordHash\"=? "
+                                                                               "\"passwordHash\"=?, "
+                                                                               "\"salt\"=? "
                                                                                "WHERE \"id\"=?";
 
 const char access::object_traits_impl<::User, id_sqlite>::erase_statement[] = "DELETE FROM \"User\" "
@@ -250,14 +304,15 @@ const char access::object_traits_impl<::User, id_sqlite>::erase_statement[] = "D
 const char access::object_traits_impl<::User, id_sqlite>::query_statement[] = "SELECT "
                                                                               "\"User\".\"id\", "
                                                                               "\"User\".\"username\", "
-                                                                              "\"User\".\"passwordHash\" "
+                                                                              "\"User\".\"passwordHash\", "
+                                                                              "\"User\".\"salt\" "
                                                                               "FROM \"User\"";
 
 const char access::object_traits_impl<::User, id_sqlite>::erase_query_statement[] = "DELETE FROM \"User\"";
 
 const char access::object_traits_impl<::User, id_sqlite>::table_name[] = "\"User\"";
 
-void access::object_traits_impl<::User, id_sqlite>::persist(database &db, const object_type &obj)
+void access::object_traits_impl<::User, id_sqlite>::persist(database &db, object_type &obj)
 {
     ODB_POTENTIALLY_UNUSED(db);
 
@@ -266,13 +321,15 @@ void access::object_traits_impl<::User, id_sqlite>::persist(database &db, const 
     sqlite::connection &conn(sqlite::transaction::current().connection());
     statements_type &sts(conn.statement_cache().find_object<object_type>());
 
-    callback(db, obj, callback_event::pre_persist);
+    callback(db, static_cast<const object_type &>(obj), callback_event::pre_persist);
 
     image_type &im(sts.image());
     binding &imb(sts.insert_image_binding());
 
     if (init(im, obj, statement_insert))
         im.version++;
+
+    im.id_null = true;
 
     if (im.version != sts.insert_image_version() || imb.version == 0)
     {
@@ -281,11 +338,24 @@ void access::object_traits_impl<::User, id_sqlite>::persist(database &db, const 
         imb.version++;
     }
 
+    {
+        id_image_type &i(sts.id_image());
+        binding &b(sts.id_image_binding());
+        if (i.version != sts.id_image_version() || b.version == 0)
+        {
+            bind(b.bind, i);
+            sts.id_image_version(i.version);
+            b.version++;
+        }
+    }
+
     insert_statement &st(sts.persist_statement());
     if (!st.execute())
         throw object_already_persistent();
 
-    callback(db, obj, callback_event::post_persist);
+    obj.id = id(sts.id_image());
+
+    callback(db, static_cast<const object_type &>(obj), callback_event::post_persist);
 }
 
 void access::object_traits_impl<::User, id_sqlite>::update(database &db, const object_type &obj)
@@ -615,9 +685,12 @@ static bool create_schema(database &db, unsigned short pass, bool drop)
         case 1:
         {
             db.execute("CREATE TABLE \"User\" (\n"
-                       "  \"id\" INTEGER NOT NULL PRIMARY KEY,\n"
+                       "  \"id\" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,\n"
                        "  \"username\" TEXT NOT NULL,\n"
-                       "  \"passwordHash\" TEXT NOT NULL)");
+                       "  \"passwordHash\" TEXT NOT NULL,\n"
+                       "  \"salt\" TEXT NOT NULL)");
+            db.execute("CREATE INDEX \"User_salt_i\"\n"
+                       "  ON \"User\" (\"salt\")");
             return false;
         }
         }

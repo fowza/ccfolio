@@ -3,7 +3,8 @@ add_library(ApplicationLib INTERFACE)
 target_include_directories(ApplicationLib INTERFACE
     ${CMAKE_CURRENT_SOURCE_DIR}/Dtos
     ${CMAKE_CURRENT_SOURCE_DIR}/Interfaces
-    ${CMAKE_CURRENT_SOURCE_DIR}/Services)
+    ${CMAKE_CURRENT_SOURCE_DIR}/Services
+    ${ARGON2_INCLUDE_DIRS})
 target_link_libraries(ApplicationLib INTERFACE
     DomainLib
     CoreLib
@@ -11,4 +12,6 @@ target_link_libraries(ApplicationLib INTERFACE
     fmt::fmt
     spdlog::spdlog
     cxxopts::cxxopts
-    PkgConfig::Pistache)
+    PkgConfig::Pistache
+    jwt-cpp
+    ${ARGON2_LIBRARIES})

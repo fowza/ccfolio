@@ -54,7 +54,7 @@ public:
 
     typedef int id_type;
 
-    static const bool auto_id = false;
+    static const bool auto_id = true;
 
     static const bool abstract = false;
 
@@ -105,6 +105,13 @@ struct query_columns<::User, id_sqlite, A>
         passwordHash_type_;
 
     static const passwordHash_type_ passwordHash;
+
+    // salt
+    //
+    typedef sqlite::query_column<sqlite::value_traits<::std::string, sqlite::id_text>::query_type, sqlite::id_text>
+        salt_type_;
+
+    static const salt_type_ salt;
 };
 
 template <typename A>
@@ -121,6 +128,11 @@ const typename query_columns<::User, id_sqlite, A>::username_type_ query_columns
 template <typename A>
 const typename query_columns<::User, id_sqlite, A>::passwordHash_type_ query_columns<::User, id_sqlite, A>::
     passwordHash(A::table_name, "\"passwordHash\"", 0);
+
+template <typename A>
+const typename query_columns<::User, id_sqlite, A>::salt_type_ query_columns<::User, id_sqlite, A>::salt(A::table_name,
+                                                                                                         "\"salt\"",
+                                                                                                         0);
 
 template <typename A>
 struct pointer_query_columns<::User, id_sqlite, A> : query_columns<::User, id_sqlite, A>
@@ -158,12 +170,20 @@ public:
         std::size_t passwordHash_size;
         bool passwordHash_null;
 
+        // salt
+        //
+        details::buffer salt_value;
+        std::size_t salt_size;
+        bool salt_null;
+
         std::size_t version;
     };
 
     struct extra_statement_cache_type;
 
     using object_traits<object_type>::id;
+
+    static id_type id(const id_image_type &);
 
     static id_type id(const image_type &);
 
@@ -183,7 +203,7 @@ public:
 
     typedef sqlite::query_base query_base_type;
 
-    static const std::size_t column_count = 3UL;
+    static const std::size_t column_count = 4UL;
     static const std::size_t id_column_count = 1UL;
     static const std::size_t inverse_column_count = 0UL;
     static const std::size_t readonly_column_count = 0UL;
@@ -203,7 +223,7 @@ public:
 
     static const char table_name[];
 
-    static void persist(database &, const object_type &);
+    static void persist(database &, object_type &);
 
     static pointer_type find(database &, const id_type &);
 

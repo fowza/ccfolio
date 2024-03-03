@@ -20,8 +20,8 @@ class User
 {
 public:
     User() = default;
-    User(int id_, std::string username_, std::string passwordHash_)
-        : id(id_), username(std::move(username_)), passwordHash(std::move(passwordHash_))
+    User(std::string username_, std::string passwordHash_, std::string salt_)
+        : username(std::move(username_)), passwordHash(std::move(passwordHash_)), salt(std::move(salt_))
     {
     }
 
@@ -38,14 +38,22 @@ public:
         return passwordHash;
     }
 
+    std::string getSalt() const
+    {
+        return salt;
+    }
+
 private:
     friend class odb::access;
 
-#pragma db id
+#pragma db id auto
     int id{};
 
     std::string username;
     std::string passwordHash;
+
+#pragma db index
+    std::string salt;
 };
 
 #endif // USER_H
