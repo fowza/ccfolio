@@ -19,7 +19,7 @@ BUILD_DIR := build
 .PHONY: all prepare tests basic_install dependencies install_pre_commit pre_commit docker clean-docker dependency_graph odb_schema
 
 # Default target
-all: prepare basic_install dependencies install_pre_commit
+all: prepare basic_install dependencies install_pre_commit tests
 
 # Prepare the build directory
 prepare:
