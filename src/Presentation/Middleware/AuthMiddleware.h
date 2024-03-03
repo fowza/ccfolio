@@ -13,6 +13,7 @@
 
 #include "LogService.h"
 #include "config.hpp"
+#include <fmt/format.h>
 #include <jwt-cpp/jwt.h>
 #include <memory>
 #include <pistache/endpoint.h>
