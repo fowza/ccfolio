@@ -32,9 +32,8 @@ set(LIBRARY_NAME "lib")
 set(UNIT_TEST_NAME "unit_tests")
 set(EXECUTABLE_NAME "ccfolio-exe")
 
-set(SECRET_KEY $ENV{SECRET_KEY} CACHE STRING "Secret key for the application")
-
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake/)
+include(env)
 include(ConfigSafeGuards)
 include(AddGitSubmodule)
 include(FindODB)
@@ -78,8 +77,6 @@ include(${ODB_USE_FILE})
 
 find_package(PkgConfig)
 pkg_check_modules(Pistache REQUIRED IMPORTED_TARGET libpistache)
-
-find_package(PkgConfig)
 pkg_check_modules(ARGON2 REQUIRED libargon2)
 
 # SUB DIRECTORIES

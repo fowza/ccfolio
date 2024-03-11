@@ -4,9 +4,10 @@
 #include "UserController.h"
 #include "UserRepository.h"
 #include "UserService.h"
+#include "config.hpp"
 #include <odb/database.hxx>
+#include <odb/mysql/database.hxx>
 #include <odb/schema-catalog.hxx>
-#include <odb/sqlite/database.hxx>
 #include <odb/transaction.hxx>
 #include <pistache/endpoint.h>
 #include <pistache/router.h>
@@ -14,11 +15,12 @@
 int main()
 {
     // Create the database
-    std::shared_ptr<odb::sqlite::database> db(
-        new odb::sqlite::database("sqlite.db", SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE));
+    std::shared_ptr<odb::mysql::database> db(new odb::mysql::database(std::string(mysql_user),
+                                                                      std::string(mysql_password),
+                                                                      std::string(mysql_database),
+                                                                      std::string(mysql_host),
+                                                                      3306 /* MySQL port */));
     odb::transaction t(db->begin());
-    odb::schema_catalog::create_schema(*db);
-    t.commit();
 
     // Create the repositories and services
     auto userRepository = std::make_shared<UserRepository>(std::make_shared<OdbRepository<User>>(db));
@@ -32,7 +34,7 @@ int main()
     TestController testController(router);
 
     // Create the server
-    Pistache::Http::Endpoint server(Pistache::Address(Pistache::Ipv4::any(), Pistache::Port(7001)));
+    Pistache::Http::Endpoint server(Pistache::Address(Pistache::Ipv4::any(), Pistache::Port(7002)));
     auto opts = Pistache::Http::Endpoint::options().threads(1);
     server.init(opts);
     server.setHandler(router.handler());
