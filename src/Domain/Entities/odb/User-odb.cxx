@@ -9,64 +9,60 @@
 #include <cassert>
 #include <cstring> // std::memcpy
 
-#include <odb/schema-catalog-impl.hxx>
 
-#include <odb/sqlite/connection.hxx>
-#include <odb/sqlite/container-statements.hxx>
-#include <odb/sqlite/database.hxx>
-#include <odb/sqlite/exceptions.hxx>
-#include <odb/sqlite/simple-object-result.hxx>
-#include <odb/sqlite/simple-object-statements.hxx>
-#include <odb/sqlite/statement-cache.hxx>
-#include <odb/sqlite/statement.hxx>
-#include <odb/sqlite/traits.hxx>
-#include <odb/sqlite/transaction.hxx>
+#include <odb/mysql/connection.hxx>
+#include <odb/mysql/container-statements.hxx>
+#include <odb/mysql/database.hxx>
+#include <odb/mysql/enum.hxx>
+#include <odb/mysql/exceptions.hxx>
+#include <odb/mysql/simple-object-result.hxx>
+#include <odb/mysql/simple-object-statements.hxx>
+#include <odb/mysql/statement-cache.hxx>
+#include <odb/mysql/statement.hxx>
+#include <odb/mysql/traits.hxx>
+#include <odb/mysql/transaction.hxx>
 
 namespace odb
 {
 // User
 //
 
-struct access::object_traits_impl<::User, id_sqlite>::extra_statement_cache_type
+struct access::object_traits_impl<::User, id_mysql>::extra_statement_cache_type
 {
-    extra_statement_cache_type(sqlite::connection &,
-                               image_type &,
-                               id_image_type &,
-                               sqlite::binding &,
-                               sqlite::binding &)
+    extra_statement_cache_type(mysql::connection &, image_type &, id_image_type &, mysql::binding &, mysql::binding &)
     {
     }
 };
 
-access::object_traits_impl<::User, id_sqlite>::id_type access::object_traits_impl<::User, id_sqlite>::id(
+access::object_traits_impl<::User, id_mysql>::id_type access::object_traits_impl<::User, id_mysql>::id(
     const id_image_type &i)
 {
-    sqlite::database *db(0);
+    mysql::database *db(0);
     ODB_POTENTIALLY_UNUSED(db);
 
     id_type id;
     {
-        sqlite::value_traits<int, sqlite::id_integer>::set_value(id, i.id_value, i.id_null);
+        mysql::value_traits<int, mysql::id_long>::set_value(id, i.id_value, i.id_null);
     }
 
     return id;
 }
 
-access::object_traits_impl<::User, id_sqlite>::id_type access::object_traits_impl<::User, id_sqlite>::id(
+access::object_traits_impl<::User, id_mysql>::id_type access::object_traits_impl<::User, id_mysql>::id(
     const image_type &i)
 {
-    sqlite::database *db(0);
+    mysql::database *db(0);
     ODB_POTENTIALLY_UNUSED(db);
 
     id_type id;
     {
-        sqlite::value_traits<int, sqlite::id_integer>::set_value(id, i.id_value, i.id_null);
+        mysql::value_traits<int, mysql::id_long>::set_value(id, i.id_value, i.id_null);
     }
 
     return id;
 }
 
-bool access::object_traits_impl<::User, id_sqlite>::grow(image_type &i, bool *t)
+bool access::object_traits_impl<::User, id_mysql>::grow(image_type &i, my_bool *t)
 {
     ODB_POTENTIALLY_UNUSED(i);
     ODB_POTENTIALLY_UNUSED(t);
@@ -75,7 +71,7 @@ bool access::object_traits_impl<::User, id_sqlite>::grow(image_type &i, bool *t)
 
     // id
     //
-    t[0UL] = false;
+    t[0UL] = 0;
 
     // username
     //
@@ -104,11 +100,11 @@ bool access::object_traits_impl<::User, id_sqlite>::grow(image_type &i, bool *t)
     return grew;
 }
 
-void access::object_traits_impl<::User, id_sqlite>::bind(sqlite::bind *b, image_type &i, sqlite::statement_kind sk)
+void access::object_traits_impl<::User, id_mysql>::bind(MYSQL_BIND *b, image_type &i, mysql::statement_kind sk)
 {
     ODB_POTENTIALLY_UNUSED(sk);
 
-    using namespace sqlite;
+    using namespace mysql;
 
     std::size_t n(0);
 
@@ -116,7 +112,8 @@ void access::object_traits_impl<::User, id_sqlite>::bind(sqlite::bind *b, image_
     //
     if (sk != statement_update)
     {
-        b[n].type = sqlite::bind::integer;
+        b[n].buffer_type = MYSQL_TYPE_LONG;
+        b[n].is_unsigned = 0;
         b[n].buffer = &i.id_value;
         b[n].is_null = &i.id_null;
         n++;
@@ -124,47 +121,48 @@ void access::object_traits_impl<::User, id_sqlite>::bind(sqlite::bind *b, image_
 
     // username
     //
-    b[n].type = sqlite::image_traits<::std::string, sqlite::id_text>::bind_value;
+    b[n].buffer_type = MYSQL_TYPE_STRING;
     b[n].buffer = i.username_value.data();
-    b[n].size = &i.username_size;
-    b[n].capacity = i.username_value.capacity();
+    b[n].buffer_length = static_cast<unsigned long>(i.username_value.capacity());
+    b[n].length = &i.username_size;
     b[n].is_null = &i.username_null;
     n++;
 
     // passwordHash
     //
-    b[n].type = sqlite::image_traits<::std::string, sqlite::id_text>::bind_value;
+    b[n].buffer_type = MYSQL_TYPE_STRING;
     b[n].buffer = i.passwordHash_value.data();
-    b[n].size = &i.passwordHash_size;
-    b[n].capacity = i.passwordHash_value.capacity();
+    b[n].buffer_length = static_cast<unsigned long>(i.passwordHash_value.capacity());
+    b[n].length = &i.passwordHash_size;
     b[n].is_null = &i.passwordHash_null;
     n++;
 
     // salt
     //
-    b[n].type = sqlite::image_traits<::std::string, sqlite::id_text>::bind_value;
+    b[n].buffer_type = MYSQL_TYPE_STRING;
     b[n].buffer = i.salt_value.data();
-    b[n].size = &i.salt_size;
-    b[n].capacity = i.salt_value.capacity();
+    b[n].buffer_length = static_cast<unsigned long>(i.salt_value.capacity());
+    b[n].length = &i.salt_size;
     b[n].is_null = &i.salt_null;
     n++;
 }
 
-void access::object_traits_impl<::User, id_sqlite>::bind(sqlite::bind *b, id_image_type &i)
+void access::object_traits_impl<::User, id_mysql>::bind(MYSQL_BIND *b, id_image_type &i)
 {
     std::size_t n(0);
-    b[n].type = sqlite::bind::integer;
+    b[n].buffer_type = MYSQL_TYPE_LONG;
+    b[n].is_unsigned = 0;
     b[n].buffer = &i.id_value;
     b[n].is_null = &i.id_null;
 }
 
-bool access::object_traits_impl<::User, id_sqlite>::init(image_type &i, const object_type &o, sqlite::statement_kind sk)
+bool access::object_traits_impl<::User, id_mysql>::init(image_type &i, const object_type &o, mysql::statement_kind sk)
 {
     ODB_POTENTIALLY_UNUSED(i);
     ODB_POTENTIALLY_UNUSED(o);
     ODB_POTENTIALLY_UNUSED(sk);
 
-    using namespace sqlite;
+    using namespace mysql;
 
     bool grew(false);
 
@@ -175,7 +173,7 @@ bool access::object_traits_impl<::User, id_sqlite>::init(image_type &i, const ob
         int const &v = o.id;
 
         bool is_null(false);
-        sqlite::value_traits<int, sqlite::id_integer>::set_image(i.id_value, is_null, v);
+        mysql::value_traits<int, mysql::id_long>::set_image(i.id_value, is_null, v);
         i.id_null = is_null;
     }
 
@@ -185,9 +183,11 @@ bool access::object_traits_impl<::User, id_sqlite>::init(image_type &i, const ob
         ::std::string const &v = o.username;
 
         bool is_null(false);
+        std::size_t size(0);
         std::size_t cap(i.username_value.capacity());
-        sqlite::value_traits<::std::string, sqlite::id_text>::set_image(i.username_value, i.username_size, is_null, v);
+        mysql::value_traits<::std::string, mysql::id_string>::set_image(i.username_value, size, is_null, v);
         i.username_null = is_null;
+        i.username_size = static_cast<unsigned long>(size);
         grew = grew || (cap != i.username_value.capacity());
     }
 
@@ -197,12 +197,11 @@ bool access::object_traits_impl<::User, id_sqlite>::init(image_type &i, const ob
         ::std::string const &v = o.passwordHash;
 
         bool is_null(false);
+        std::size_t size(0);
         std::size_t cap(i.passwordHash_value.capacity());
-        sqlite::value_traits<::std::string, sqlite::id_text>::set_image(i.passwordHash_value,
-                                                                        i.passwordHash_size,
-                                                                        is_null,
-                                                                        v);
+        mysql::value_traits<::std::string, mysql::id_string>::set_image(i.passwordHash_value, size, is_null, v);
         i.passwordHash_null = is_null;
+        i.passwordHash_size = static_cast<unsigned long>(size);
         grew = grew || (cap != i.passwordHash_value.capacity());
     }
 
@@ -212,16 +211,18 @@ bool access::object_traits_impl<::User, id_sqlite>::init(image_type &i, const ob
         ::std::string const &v = o.salt;
 
         bool is_null(false);
+        std::size_t size(0);
         std::size_t cap(i.salt_value.capacity());
-        sqlite::value_traits<::std::string, sqlite::id_text>::set_image(i.salt_value, i.salt_size, is_null, v);
+        mysql::value_traits<::std::string, mysql::id_string>::set_image(i.salt_value, size, is_null, v);
         i.salt_null = is_null;
+        i.salt_size = static_cast<unsigned long>(size);
         grew = grew || (cap != i.salt_value.capacity());
     }
 
     return grew;
 }
 
-void access::object_traits_impl<::User, id_sqlite>::init(object_type &o, const image_type &i, database *db)
+void access::object_traits_impl<::User, id_mysql>::init(object_type &o, const image_type &i, database *db)
 {
     ODB_POTENTIALLY_UNUSED(o);
     ODB_POTENTIALLY_UNUSED(i);
@@ -232,7 +233,7 @@ void access::object_traits_impl<::User, id_sqlite>::init(object_type &o, const i
     {
         int &v = o.id;
 
-        sqlite::value_traits<int, sqlite::id_integer>::set_value(v, i.id_value, i.id_null);
+        mysql::value_traits<int, mysql::id_long>::set_value(v, i.id_value, i.id_null);
     }
 
     // username
@@ -240,7 +241,7 @@ void access::object_traits_impl<::User, id_sqlite>::init(object_type &o, const i
     {
         ::std::string &v = o.username;
 
-        sqlite::value_traits<::std::string, sqlite::id_text>::set_value(v,
+        mysql::value_traits<::std::string, mysql::id_string>::set_value(v,
                                                                         i.username_value,
                                                                         i.username_size,
                                                                         i.username_null);
@@ -251,7 +252,7 @@ void access::object_traits_impl<::User, id_sqlite>::init(object_type &o, const i
     {
         ::std::string &v = o.passwordHash;
 
-        sqlite::value_traits<::std::string, sqlite::id_text>::set_value(v,
+        mysql::value_traits<::std::string, mysql::id_string>::set_value(v,
                                                                         i.passwordHash_value,
                                                                         i.passwordHash_size,
                                                                         i.passwordHash_null);
@@ -262,63 +263,63 @@ void access::object_traits_impl<::User, id_sqlite>::init(object_type &o, const i
     {
         ::std::string &v = o.salt;
 
-        sqlite::value_traits<::std::string, sqlite::id_text>::set_value(v, i.salt_value, i.salt_size, i.salt_null);
+        mysql::value_traits<::std::string, mysql::id_string>::set_value(v, i.salt_value, i.salt_size, i.salt_null);
     }
 }
 
-void access::object_traits_impl<::User, id_sqlite>::init(id_image_type &i, const id_type &id)
+void access::object_traits_impl<::User, id_mysql>::init(id_image_type &i, const id_type &id)
 {
     {
         bool is_null(false);
-        sqlite::value_traits<int, sqlite::id_integer>::set_image(i.id_value, is_null, id);
+        mysql::value_traits<int, mysql::id_long>::set_image(i.id_value, is_null, id);
         i.id_null = is_null;
     }
 }
 
-const char access::object_traits_impl<::User, id_sqlite>::persist_statement[] = "INSERT INTO \"User\" "
-                                                                                "(\"id\", "
-                                                                                "\"username\", "
-                                                                                "\"passwordHash\", "
-                                                                                "\"salt\") "
-                                                                                "VALUES "
-                                                                                "(?, ?, ?, ?)";
+const char access::object_traits_impl<::User, id_mysql>::persist_statement[] = "INSERT INTO `User` "
+                                                                               "(`id`, "
+                                                                               "`username`, "
+                                                                               "`passwordHash`, "
+                                                                               "`salt`) "
+                                                                               "VALUES "
+                                                                               "(?, ?, ?, ?)";
 
-const char access::object_traits_impl<::User, id_sqlite>::find_statement[] = "SELECT "
-                                                                             "\"User\".\"id\", "
-                                                                             "\"User\".\"username\", "
-                                                                             "\"User\".\"passwordHash\", "
-                                                                             "\"User\".\"salt\" "
-                                                                             "FROM \"User\" "
-                                                                             "WHERE \"User\".\"id\"=?";
+const char access::object_traits_impl<::User, id_mysql>::find_statement[] = "SELECT "
+                                                                            "`User`.`id`, "
+                                                                            "`User`.`username`, "
+                                                                            "`User`.`passwordHash`, "
+                                                                            "`User`.`salt` "
+                                                                            "FROM `User` "
+                                                                            "WHERE `User`.`id`=?";
 
-const char access::object_traits_impl<::User, id_sqlite>::update_statement[] = "UPDATE \"User\" "
-                                                                               "SET "
-                                                                               "\"username\"=?, "
-                                                                               "\"passwordHash\"=?, "
-                                                                               "\"salt\"=? "
-                                                                               "WHERE \"id\"=?";
+const char access::object_traits_impl<::User, id_mysql>::update_statement[] = "UPDATE `User` "
+                                                                              "SET "
+                                                                              "`username`=?, "
+                                                                              "`passwordHash`=?, "
+                                                                              "`salt`=? "
+                                                                              "WHERE `id`=?";
 
-const char access::object_traits_impl<::User, id_sqlite>::erase_statement[] = "DELETE FROM \"User\" "
-                                                                              "WHERE \"id\"=?";
+const char access::object_traits_impl<::User, id_mysql>::erase_statement[] = "DELETE FROM `User` "
+                                                                             "WHERE `id`=?";
 
-const char access::object_traits_impl<::User, id_sqlite>::query_statement[] = "SELECT "
-                                                                              "\"User\".\"id\", "
-                                                                              "\"User\".\"username\", "
-                                                                              "\"User\".\"passwordHash\", "
-                                                                              "\"User\".\"salt\" "
-                                                                              "FROM \"User\"";
+const char access::object_traits_impl<::User, id_mysql>::query_statement[] = "SELECT "
+                                                                             "`User`.`id`, "
+                                                                             "`User`.`username`, "
+                                                                             "`User`.`passwordHash`, "
+                                                                             "`User`.`salt` "
+                                                                             "FROM `User`";
 
-const char access::object_traits_impl<::User, id_sqlite>::erase_query_statement[] = "DELETE FROM \"User\"";
+const char access::object_traits_impl<::User, id_mysql>::erase_query_statement[] = "DELETE FROM `User`";
 
-const char access::object_traits_impl<::User, id_sqlite>::table_name[] = "\"User\"";
+const char access::object_traits_impl<::User, id_mysql>::table_name[] = "`User`";
 
-void access::object_traits_impl<::User, id_sqlite>::persist(database &db, object_type &obj)
+void access::object_traits_impl<::User, id_mysql>::persist(database &db, object_type &obj)
 {
     ODB_POTENTIALLY_UNUSED(db);
 
-    using namespace sqlite;
+    using namespace mysql;
 
-    sqlite::connection &conn(sqlite::transaction::current().connection());
+    mysql::connection &conn(mysql::transaction::current().connection());
     statements_type &sts(conn.statement_cache().find_object<object_type>());
 
     callback(db, static_cast<const object_type &>(obj), callback_event::pre_persist);
@@ -329,7 +330,7 @@ void access::object_traits_impl<::User, id_sqlite>::persist(database &db, object
     if (init(im, obj, statement_insert))
         im.version++;
 
-    im.id_null = true;
+    im.id_value = 0;
 
     if (im.version != sts.insert_image_version() || imb.version == 0)
     {
@@ -358,17 +359,17 @@ void access::object_traits_impl<::User, id_sqlite>::persist(database &db, object
     callback(db, static_cast<const object_type &>(obj), callback_event::post_persist);
 }
 
-void access::object_traits_impl<::User, id_sqlite>::update(database &db, const object_type &obj)
+void access::object_traits_impl<::User, id_mysql>::update(database &db, const object_type &obj)
 {
     ODB_POTENTIALLY_UNUSED(db);
 
-    using namespace sqlite;
-    using sqlite::update_statement;
+    using namespace mysql;
+    using mysql::update_statement;
 
     callback(db, obj, callback_event::pre_update);
 
-    sqlite::transaction &tr(sqlite::transaction::current());
-    sqlite::connection &conn(tr.connection());
+    mysql::transaction &tr(mysql::transaction::current());
+    mysql::connection &conn(tr.connection());
     statements_type &sts(conn.statement_cache().find_object<object_type>());
 
     const id_type &id(obj.id);
@@ -413,13 +414,13 @@ void access::object_traits_impl<::User, id_sqlite>::update(database &db, const o
     pointer_cache_traits::update(db, obj);
 }
 
-void access::object_traits_impl<::User, id_sqlite>::erase(database &db, const id_type &id)
+void access::object_traits_impl<::User, id_mysql>::erase(database &db, const id_type &id)
 {
-    using namespace sqlite;
+    using namespace mysql;
 
     ODB_POTENTIALLY_UNUSED(db);
 
-    sqlite::connection &conn(sqlite::transaction::current().connection());
+    mysql::connection &conn(mysql::transaction::current().connection());
     statements_type &sts(conn.statement_cache().find_object<object_type>());
 
     id_image_type &i(sts.id_image());
@@ -439,11 +440,11 @@ void access::object_traits_impl<::User, id_sqlite>::erase(database &db, const id
     pointer_cache_traits::erase(db, id);
 }
 
-access::object_traits_impl<::User, id_sqlite>::pointer_type access::object_traits_impl<::User, id_sqlite>::find(
+access::object_traits_impl<::User, id_mysql>::pointer_type access::object_traits_impl<::User, id_mysql>::find(
     database &db,
     const id_type &id)
 {
-    using namespace sqlite;
+    using namespace mysql;
 
     {
         pointer_type p(pointer_cache_traits::find(db, id));
@@ -452,7 +453,7 @@ access::object_traits_impl<::User, id_sqlite>::pointer_type access::object_trait
             return p;
     }
 
-    sqlite::connection &conn(sqlite::transaction::current().connection());
+    mysql::connection &conn(mysql::transaction::current().connection());
     statements_type &sts(conn.statement_cache().find_object<object_type>());
 
     statements_type::auto_lock l(sts);
@@ -491,11 +492,11 @@ access::object_traits_impl<::User, id_sqlite>::pointer_type access::object_trait
     return p;
 }
 
-bool access::object_traits_impl<::User, id_sqlite>::find(database &db, const id_type &id, object_type &obj)
+bool access::object_traits_impl<::User, id_mysql>::find(database &db, const id_type &id, object_type &obj)
 {
-    using namespace sqlite;
+    using namespace mysql;
 
-    sqlite::connection &conn(sqlite::transaction::current().connection());
+    mysql::connection &conn(mysql::transaction::current().connection());
     statements_type &sts(conn.statement_cache().find_object<object_type>());
 
     statements_type::auto_lock l(sts);
@@ -520,11 +521,11 @@ bool access::object_traits_impl<::User, id_sqlite>::find(database &db, const id_
     return true;
 }
 
-bool access::object_traits_impl<::User, id_sqlite>::reload(database &db, object_type &obj)
+bool access::object_traits_impl<::User, id_mysql>::reload(database &db, object_type &obj)
 {
-    using namespace sqlite;
+    using namespace mysql;
 
-    sqlite::connection &conn(sqlite::transaction::current().connection());
+    mysql::connection &conn(mysql::transaction::current().connection());
     statements_type &sts(conn.statement_cache().find_object<object_type>());
 
     statements_type::auto_lock l(sts);
@@ -546,9 +547,9 @@ bool access::object_traits_impl<::User, id_sqlite>::reload(database &db, object_
     return true;
 }
 
-bool access::object_traits_impl<::User, id_sqlite>::find_(statements_type &sts, const id_type *id)
+bool access::object_traits_impl<::User, id_mysql>::find_(statements_type &sts, const id_type *id)
 {
-    using namespace sqlite;
+    using namespace mysql;
 
     id_image_type &i(sts.id_image());
     init(i, *id);
@@ -594,15 +595,15 @@ bool access::object_traits_impl<::User, id_sqlite>::find_(statements_type &sts, 
     return r != select_statement::no_data;
 }
 
-result<access::object_traits_impl<::User, id_sqlite>::object_type> access::object_traits_impl<::User, id_sqlite>::query(
+result<access::object_traits_impl<::User, id_mysql>::object_type> access::object_traits_impl<::User, id_mysql>::query(
     database &,
     const query_base_type &q)
 {
-    using namespace sqlite;
+    using namespace mysql;
     using odb::details::shared;
     using odb::details::shared_ptr;
 
-    sqlite::connection &conn(sqlite::transaction::current().connection());
+    mysql::connection &conn(mysql::transaction::current().connection());
 
     statements_type &sts(conn.statement_cache().find_object<object_type>());
 
@@ -630,16 +631,16 @@ result<access::object_traits_impl<::User, id_sqlite>::object_type> access::objec
     st->execute();
 
     shared_ptr<odb::object_result_impl<object_type>> r(new (shared)
-                                                           sqlite::object_result_impl<object_type>(q, st, sts, 0));
+                                                           mysql::object_result_impl<object_type>(q, st, sts, 0));
 
     return result<object_type>(r);
 }
 
-unsigned long long access::object_traits_impl<::User, id_sqlite>::erase_query(database &, const query_base_type &q)
+unsigned long long access::object_traits_impl<::User, id_mysql>::erase_query(database &, const query_base_type &q)
 {
-    using namespace sqlite;
+    using namespace mysql;
 
-    sqlite::connection &conn(sqlite::transaction::current().connection());
+    mysql::connection &conn(mysql::transaction::current().connection());
 
     std::string text(erase_query_statement);
     if (!q.empty())
@@ -653,53 +654,6 @@ unsigned long long access::object_traits_impl<::User, id_sqlite>::erase_query(da
 
     return st.execute();
 }
-} // namespace odb
-
-namespace odb
-{
-static bool create_schema(database &db, unsigned short pass, bool drop)
-{
-    ODB_POTENTIALLY_UNUSED(db);
-    ODB_POTENTIALLY_UNUSED(pass);
-    ODB_POTENTIALLY_UNUSED(drop);
-
-    if (drop)
-    {
-        switch (pass)
-        {
-        case 1:
-        {
-            return true;
-        }
-        case 2:
-        {
-            db.execute("DROP TABLE IF EXISTS \"User\"");
-            return false;
-        }
-        }
-    }
-    else
-    {
-        switch (pass)
-        {
-        case 1:
-        {
-            db.execute("CREATE TABLE \"User\" (\n"
-                       "  \"id\" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,\n"
-                       "  \"username\" TEXT NOT NULL,\n"
-                       "  \"passwordHash\" TEXT NOT NULL,\n"
-                       "  \"salt\" TEXT NOT NULL)");
-            db.execute("CREATE INDEX \"User_salt_i\"\n"
-                       "  ON \"User\" (\"salt\")");
-            return false;
-        }
-        }
-    }
-
-    return false;
-}
-
-static const schema_catalog_create_entry create_schema_entry_(id_sqlite, "", &create_schema);
 } // namespace odb
 
 #include <odb/post.hxx>

@@ -22,16 +22,16 @@
 #include <odb/database.hxx>
 #include <odb/exception.hxx>
 #include <odb/exceptions.hxx>
-#include <odb/sqlite/database.hxx>
+#include <odb/mysql/database.hxx>
 #include <odb/transaction.hxx>
 
 template <typename T, typename IdType = int>
 class OdbRepository : public IRepository<T, IdType>
 {
-    std::shared_ptr<odb::sqlite::database> db;
+    std::shared_ptr<odb::mysql::database> db;
 
 public:
-    explicit OdbRepository(std::shared_ptr<odb::sqlite::database> db) : db(std::move(db))
+    explicit OdbRepository(std::shared_ptr<odb::mysql::database> db) : db(std::move(db))
     {
     }
 
@@ -174,7 +174,7 @@ public:
         }
     }
 
-    std::shared_ptr<odb::sqlite::database> database() const
+    std::shared_ptr<odb::mysql::database> database() const
     {
         return db;
     }

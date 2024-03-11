@@ -72,81 +72,82 @@ public:
 
 #include <odb/details/buffer.hxx>
 
-#include <odb/sqlite/binding.hxx>
-#include <odb/sqlite/forward.hxx>
-#include <odb/sqlite/query.hxx>
-#include <odb/sqlite/sqlite-types.hxx>
-#include <odb/sqlite/version.hxx>
+#include <odb/mysql/binding.hxx>
+#include <odb/mysql/forward.hxx>
+#include <odb/mysql/mysql-types.hxx>
+#include <odb/mysql/query.hxx>
+#include <odb/mysql/version.hxx>
 
 namespace odb
 {
 // User
 //
 template <typename A>
-struct query_columns<::User, id_sqlite, A>
+struct query_columns<::User, id_mysql, A>
 {
     // id
     //
-    typedef sqlite::query_column<sqlite::value_traits<int, sqlite::id_integer>::query_type, sqlite::id_integer>
-        id_type_;
+    typedef mysql::query_column<mysql::value_traits<int, mysql::id_long>::query_type, mysql::id_long> id_type_;
 
     static const id_type_ id;
 
     // username
     //
-    typedef sqlite::query_column<sqlite::value_traits<::std::string, sqlite::id_text>::query_type, sqlite::id_text>
+    typedef mysql::query_column<mysql::value_traits<::std::string, mysql::id_string>::query_type, mysql::id_string>
         username_type_;
 
     static const username_type_ username;
 
     // passwordHash
     //
-    typedef sqlite::query_column<sqlite::value_traits<::std::string, sqlite::id_text>::query_type, sqlite::id_text>
+    typedef mysql::query_column<mysql::value_traits<::std::string, mysql::id_string>::query_type, mysql::id_string>
         passwordHash_type_;
 
     static const passwordHash_type_ passwordHash;
 
     // salt
     //
-    typedef sqlite::query_column<sqlite::value_traits<::std::string, sqlite::id_text>::query_type, sqlite::id_text>
+    typedef mysql::query_column<mysql::value_traits<::std::string, mysql::id_string>::query_type, mysql::id_string>
         salt_type_;
 
     static const salt_type_ salt;
 };
 
 template <typename A>
-const typename query_columns<::User, id_sqlite, A>::id_type_ query_columns<::User, id_sqlite, A>::id(A::table_name,
-                                                                                                     "\"id\"",
-                                                                                                     0);
+const typename query_columns<::User, id_mysql, A>::id_type_ query_columns<::User, id_mysql, A>::id(A::table_name,
+                                                                                                   "`id`",
+                                                                                                   0);
 
 template <typename A>
-const typename query_columns<::User, id_sqlite, A>::username_type_ query_columns<::User, id_sqlite, A>::username(
+const typename query_columns<::User, id_mysql, A>::username_type_ query_columns<::User, id_mysql, A>::username(
     A::table_name,
-    "\"username\"",
+    "`username`",
     0);
 
 template <typename A>
-const typename query_columns<::User, id_sqlite, A>::passwordHash_type_ query_columns<::User, id_sqlite, A>::
-    passwordHash(A::table_name, "\"passwordHash\"", 0);
+const typename query_columns<::User, id_mysql, A>::passwordHash_type_ query_columns<::User, id_mysql, A>::passwordHash(
+    A::table_name,
+    "`passwordHash`",
+    0);
 
 template <typename A>
-const typename query_columns<::User, id_sqlite, A>::salt_type_ query_columns<::User, id_sqlite, A>::salt(A::table_name,
-                                                                                                         "\"salt\"",
-                                                                                                         0);
+const typename query_columns<::User, id_mysql, A>::salt_type_ query_columns<::User, id_mysql, A>::salt(A::table_name,
+                                                                                                       "`salt`",
+                                                                                                       0);
 
 template <typename A>
-struct pointer_query_columns<::User, id_sqlite, A> : query_columns<::User, id_sqlite, A>
+struct pointer_query_columns<::User, id_mysql, A> : query_columns<::User, id_mysql, A>
 {
 };
 
 template <>
-class access::object_traits_impl<::User, id_sqlite> : public access::object_traits<::User>
+class access::object_traits_impl<::User, id_mysql> : public access::object_traits<::User>
 {
 public:
     struct id_image_type
     {
-        long long id_value;
-        bool id_null;
+        int id_value;
+        my_bool id_null;
 
         std::size_t version;
     };
@@ -155,26 +156,26 @@ public:
     {
         // id
         //
-        long long id_value;
-        bool id_null;
+        int id_value;
+        my_bool id_null;
 
         // username
         //
         details::buffer username_value;
-        std::size_t username_size;
-        bool username_null;
+        unsigned long username_size;
+        my_bool username_null;
 
         // passwordHash
         //
         details::buffer passwordHash_value;
-        std::size_t passwordHash_size;
-        bool passwordHash_null;
+        unsigned long passwordHash_size;
+        my_bool passwordHash_null;
 
         // salt
         //
         details::buffer salt_value;
-        std::size_t salt_size;
-        bool salt_null;
+        unsigned long salt_size;
+        my_bool salt_null;
 
         std::size_t version;
     };
@@ -187,21 +188,21 @@ public:
 
     static id_type id(const image_type &);
 
-    static bool grow(image_type &, bool *);
+    static bool grow(image_type &, my_bool *);
 
-    static void bind(sqlite::bind *, image_type &, sqlite::statement_kind);
+    static void bind(MYSQL_BIND *, image_type &, mysql::statement_kind);
 
-    static void bind(sqlite::bind *, id_image_type &);
+    static void bind(MYSQL_BIND *, id_image_type &);
 
-    static bool init(image_type &, const object_type &, sqlite::statement_kind);
+    static bool init(image_type &, const object_type &, mysql::statement_kind);
 
     static void init(object_type &, const image_type &, database *);
 
     static void init(id_image_type &, const id_type &);
 
-    typedef sqlite::object_statements<object_type> statements_type;
+    typedef mysql::object_statements<object_type> statements_type;
 
-    typedef sqlite::query_base query_base_type;
+    typedef mysql::query_base query_base_type;
 
     static const std::size_t column_count = 4UL;
     static const std::size_t id_column_count = 1UL;
@@ -248,7 +249,7 @@ public:
 };
 
 template <>
-class access::object_traits_impl<::User, id_common> : public access::object_traits_impl<::User, id_sqlite>
+class access::object_traits_impl<::User, id_common> : public access::object_traits_impl<::User, id_mysql>
 {
 };
 
