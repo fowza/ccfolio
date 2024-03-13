@@ -13,12 +13,10 @@
 
 #include "LogService.h"
 #include "config.hpp"
+#include <Router.h>
 #include <fmt/format.h>
 #include <jwt-cpp/jwt.h>
 #include <memory>
-#include <pistache/endpoint.h>
-#include <pistache/http.h>
-#include <pistache/router.h>
 
 namespace AuthMiddleware
 {
@@ -56,28 +54,37 @@ bool verifyToken(const std::string &token)
      * @param response The response to send if the token is invalid
      * @return true if the token is valid, false otherwise
      */
-bool validateToken(const Pistache::Rest::Request &request, Pistache::Http::ResponseWriter &response)
+bool validateToken(const HttpRequest &req, HttpResponse &res)
 {
     try
     {
-        auto authHeader = request.headers().get<Pistache::Http::Header::Authorization>();
-        if (!authHeader)
+        auto authHeader = req.find("Authorization");
+        if (authHeader == req.end())
         {
-            response.send(Pistache::Http::Code::Unauthorized, "Authorization header is missing");
+            res.result(http::status::unauthorized);
+            res.set(http::field::content_type, "application/json");
+            res.body() = "Authorization header is missing";
+            res.prepare_payload();
             return false;
         }
 
-        std::string token = authHeader->value();
+        std::string token = std::string(authHeader->value());
         if (token.find("Bearer ") != 0)
         {
-            response.send(Pistache::Http::Code::Unauthorized, "Invalid token format");
+            res.result(http::status::unauthorized);
+            res.set(http::field::content_type, "application/json");
+            res.body() = "Invalid token format";
+            res.prepare_payload();
             return false;
         }
         token = token.substr(7); // Remove "Bearer " prefix
 
         if (!verifyToken(token))
         {
-            response.send(Pistache::Http::Code::Unauthorized, "Invalid or expired token");
+            res.result(http::status::unauthorized);
+            res.set(http::field::content_type, "application/json");
+            res.body() = "Invalid or expired token";
+            res.prepare_payload();
             return false;
         }
 
@@ -90,24 +97,28 @@ bool validateToken(const Pistache::Rest::Request &request, Pistache::Http::Respo
     return false;
 }
 
+
 /**
      * @brief Middleware for verifying jwt tokens
      *
      * @param func The function to call if the token is valid
      * @return A handler that calls the given function if the token is valid
      */
-auto withAuthentication(Pistache::Rest::Route::Handler func) -> Pistache::Rest::Route::Handler
+auto withAuthentication(Handler func) -> Handler
 {
-    return [func](Pistache::Rest::Request request,
-                  Pistache::Http::ResponseWriter response) -> Pistache::Rest::Route::Result {
-        if (!validateToken(request, response))
+    return [func](const HttpRequest &req, HttpResponse &res) {
+        if (!validateToken(req, res))
         {
-            response.send(Pistache::Http::Code::Unauthorized, "Invalid or missing token");
-            return Pistache::Rest::Route::Result::Failure;
+            res.result(http::status::unauthorized);
+            res.set(http::field::content_type, "application/json");
+            res.body() = "Invalid or missing token";
+            res.prepare_payload();
+            return;
         }
-        return func(std::move(request), std::move(response));
+        func(req, res);
     };
 }
+
 
 } // namespace AuthMiddleware
 

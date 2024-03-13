@@ -26,7 +26,7 @@ public:
      */
     static std::string getAppDataPath()
     {
-        std::string folderName = "ccfolio";
+        std::string folderName = "ccfolio/logs";
         auto homePath = std::filesystem::path(std::getenv("HOME")) / folderName;
         std::filesystem::create_directories(homePath);
         return homePath.string();

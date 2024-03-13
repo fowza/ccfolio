@@ -4,12 +4,14 @@
 *.pptx
 CMakeUserPresets.json
 .env
+./-.s
 ################################
 ########### FOLDERS ############
 ################################
 build/
 html/
 .idea
+logs/
 cmake-build-debug
 .vscode
 ################################

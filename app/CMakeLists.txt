@@ -19,7 +19,7 @@ target_link_libraries(
             ${ODB_LIBRARIES}
             spdlog::spdlog
             cxxopts::cxxopts
-            PkgConfig::Pistache )
+            ${Boost_LIBRARIES})
 
 if(${ENABLE_WARNINGS})
     target_set_warnings(

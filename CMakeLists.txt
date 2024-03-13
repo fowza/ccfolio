@@ -75,8 +75,9 @@ find_package(ODB REQUIRED
     COMPONENTS mysql sqlite)
 include(${ODB_USE_FILE})
 
+find_package(Boost 1.71.0 REQUIRED COMPONENTS system thread)
+
 find_package(PkgConfig)
-pkg_check_modules(Pistache REQUIRED IMPORTED_TARGET libpistache)
 pkg_check_modules(ARGON2 REQUIRED libargon2)
 
 # SUB DIRECTORIES

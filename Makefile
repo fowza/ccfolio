@@ -10,7 +10,7 @@ MAKE_CMD := make
 # Package lists
 BASIC_PACKAGES := gcc g++ $(CMAKE_CMD) $(MAKE_CMD) doxygen graphviz clang-format git llvm pkg-config curl zip unzip tar python3-dev python3-pip clang-tidy meson ninja-build
 TEST_PACKAGES := gcovr lcov
-DEVELOPMENT_PACKAGES := libpistache-dev odb gcovr lcov libsqlite3-dev libargon2-dev libmysqlclient-dev
+DEVELOPMENT_PACKAGES := odb gcovr lcov libsqlite3-dev libargon2-dev libmysqlclient-dev libboost-all-dev
 PYTHON_PACKAGES := pre-commit cmake-format
 
 # Directories
@@ -41,7 +41,7 @@ tests:
 # Install development dependencies
 dependencies:
 	@echo "Installing development dependencies..."
-	sudo add-apt-repository ppa:pistache+team/unstable && $(APT_CMD) update
+	$(APT_CMD) update
 	$(APT_GET_CMD) install -y $(DEVELOPMENT_PACKAGES)
 
 # Install and setup Python-based tools (pre-commit, cmake-format)
@@ -76,4 +76,4 @@ dependency_graph:
 # Generate ODB schema
 odb_schema:
 	@echo "Generating ODB schema..."
-	odb --std c++11 --database mysql --generate-query --generate-schema -o ./src/Domain/Entities/odb/ ./src/Domain/Entities/User.h
+	odb --std c++11 --database mysql --generate-query --generate-schema -o ./src/Entities/odb/ ./src/Entities/User.h

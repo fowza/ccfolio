@@ -14,33 +14,23 @@
 
 #include "AuthMiddleware.h"
 #include "LogService.h"
+#include <Router.h>
 #include <fmt/format.h>
 #include <functional>
 #include <jwt-cpp/jwt.h>
 #include <nlohmann/json.hpp>
-#include <pistache/router.h>
 
 using json = nlohmann::json;
 
 class TestController
 {
 public:
-    TestController(Pistache::Rest::Router &router) : router(router)
+    TestController(Router *router)
     {
-        setupRoutes();
-    }
-
-    /**
-     * @brief Set up the routes for the user controller
-     *
-     */
-    void setupRoutes()
-    {
-        using namespace Pistache::Rest;
-
-        Routes::Post(router,
-                     "/test",
-                     AuthMiddleware::withAuthentication(Routes::bind(&TestController::handleHelloWorld, this)));
+        router->addRoute("POST",
+                         "/test",
+                         AuthMiddleware::withAuthentication(
+                             [this](const HttpRequest &req, HttpResponse &res) { this->handleHelloWorld(req, res); }));
     }
 
 private:
@@ -50,27 +40,26 @@ private:
      * @param request The request
      * @param response The response
      */
-    void handleHelloWorld(const Pistache::Rest::Request &request, Pistache::Http::ResponseWriter response)
+    void handleHelloWorld(const HttpRequest &req, HttpResponse &res)
     {
         try
         {
-            response.headers().add<Pistache::Http::Header::ContentType>(MIME(Application, Json));
-
-            auto jsonPayload = json::parse(request.body());
+            auto jsonPayload = json::parse(req.body());
             const std::string username = jsonPayload["username"];
 
             json j;
             j["message"] = fmt::format("Hello {}", username);
 
-            response.send(Pistache::Http::Code::Ok, j.dump());
+            res.result(http::status::ok);
+            res.set(http::field::content_type, "application/json");
+            res.body() = j.dump();
+            res.prepare_payload();
         }
         catch (const std::exception &e)
         {
             LOG(LogService::LogLevel::ERROR, e.what());
         }
     }
-
-    Pistache::Rest::Router &router;
 };
 
 #endif // TEST_CONTROLLER_H
