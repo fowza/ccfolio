@@ -12,7 +12,9 @@
 #ifndef APPPATHSERVICE_HPP
 #define APPPATHSERVICE_HPP
 
+#include <config.hpp>
 #include <filesystem>
+#include <fmt/format.h>
 #include <string>
 
 class AppPathService
@@ -26,7 +28,7 @@ public:
      */
     static std::string getAppDataPath()
     {
-        std::string folderName = "ccfolio/logs";
+        std::string folderName = fmt::format("{0}/logs", project_name);
         auto homePath = std::filesystem::path(std::getenv("HOME")) / folderName;
         std::filesystem::create_directories(homePath);
         return homePath.string();

@@ -2,16 +2,9 @@ add_library(${LIBRARY_NAME} STATIC)
 
 file(GLOB_RECURSE SOURCES
         ${CMAKE_CURRENT_SOURCE_DIR}/Network/*.cc
-        ${CMAKE_CURRENT_SOURCE_DIR}/Controllers/*.cc
-        ${CMAKE_CURRENT_SOURCE_DIR}/Services/*.cc
-        ${CMAKE_CURRENT_SOURCE_DIR}/Dtos/*.cc
-        ${CMAKE_CURRENT_SOURCE_DIR}/Interfaces/*.cc
-        ${CMAKE_CURRENT_SOURCE_DIR}/Middleware/*.cc
-        ${CMAKE_CURRENT_SOURCE_DIR}/Repositories/*.cc
+        ../app/Middleware/*.cc
         ${CMAKE_CURRENT_SOURCE_DIR}/Utility/*.cc
-        ${CMAKE_CURRENT_SOURCE_DIR}/Entities/*.cc
-        ${CMAKE_CURRENT_SOURCE_DIR}/Entities/odb/*.cxx
-        ${CMAKE_CURRENT_SOURCE_DIR}/Entities/Match/*.cc
+        ${CMAKE_CURRENT_SOURCE_DIR}/Security/*.cc
 )
 
 target_sources(${LIBRARY_NAME} PRIVATE ${SOURCES})
@@ -19,19 +12,10 @@ target_sources(${LIBRARY_NAME} PRIVATE ${SOURCES})
 target_include_directories(${LIBRARY_NAME} PUBLIC
         # Root
         ${CMAKE_CURRENT_SOURCE_DIR}/Network
-        ${CMAKE_CURRENT_SOURCE_DIR}/Controllers
-        ${CMAKE_CURRENT_SOURCE_DIR}/Services
-        ${CMAKE_CURRENT_SOURCE_DIR}/Dtos
-        ${CMAKE_CURRENT_SOURCE_DIR}/Interfaces
-        ${CMAKE_CURRENT_SOURCE_DIR}/Middleware
-        ${CMAKE_CURRENT_SOURCE_DIR}/Repositories
+        ../app/Middleware
         ${CMAKE_CURRENT_SOURCE_DIR}/Utility
+        ${CMAKE_CURRENT_SOURCE_DIR}/Security
         ${CMAKE_BINARY_DIR}/configured_files/include/
-
-        # Entities
-        ${CMAKE_CURRENT_SOURCE_DIR}/Entities
-        ${CMAKE_CURRENT_SOURCE_DIR}/Entities/odb
-        ${CMAKE_CURRENT_SOURCE_DIR}/Entities/Match
 
         # External
         ${Boost_INCLUDE_DIRS}

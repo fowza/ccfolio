@@ -10,59 +10,87 @@
 #include <cstring> // std::memcpy
 
 
-#include <odb/mysql/connection.hxx>
-#include <odb/mysql/container-statements.hxx>
-#include <odb/mysql/database.hxx>
-#include <odb/mysql/enum.hxx>
-#include <odb/mysql/exceptions.hxx>
-#include <odb/mysql/simple-object-result.hxx>
-#include <odb/mysql/simple-object-statements.hxx>
-#include <odb/mysql/statement-cache.hxx>
-#include <odb/mysql/statement.hxx>
-#include <odb/mysql/traits.hxx>
-#include <odb/mysql/transaction.hxx>
+#include <odb/pgsql/connection.hxx>
+#include <odb/pgsql/container-statements.hxx>
+#include <odb/pgsql/database.hxx>
+#include <odb/pgsql/exceptions.hxx>
+#include <odb/pgsql/simple-object-result.hxx>
+#include <odb/pgsql/simple-object-statements.hxx>
+#include <odb/pgsql/statement-cache.hxx>
+#include <odb/pgsql/statement.hxx>
+#include <odb/pgsql/traits.hxx>
+#include <odb/pgsql/transaction.hxx>
 
 namespace odb
 {
 // User
 //
 
-struct access::object_traits_impl<::User, id_mysql>::extra_statement_cache_type
+const char access::object_traits_impl<::User, id_pgsql>::persist_statement_name[] = "persist_User";
+
+const char access::object_traits_impl<::User, id_pgsql>::find_statement_name[] = "find_User";
+
+const char access::object_traits_impl<::User, id_pgsql>::update_statement_name[] = "update_User";
+
+const char access::object_traits_impl<::User, id_pgsql>::erase_statement_name[] = "erase_User";
+
+const char access::object_traits_impl<::User, id_pgsql>::query_statement_name[] = "query_User";
+
+const char access::object_traits_impl<::User, id_pgsql>::erase_query_statement_name[] = "erase_query_User";
+
+const unsigned int access::object_traits_impl<::User, id_pgsql>::persist_statement_types[] = {pgsql::text_oid,
+                                                                                              pgsql::text_oid,
+                                                                                              pgsql::text_oid};
+
+const unsigned int access::object_traits_impl<::User, id_pgsql>::find_statement_types[] = {pgsql::int4_oid};
+
+const unsigned int access::object_traits_impl<::User, id_pgsql>::update_statement_types[] = {pgsql::text_oid,
+                                                                                             pgsql::text_oid,
+                                                                                             pgsql::text_oid,
+                                                                                             pgsql::int4_oid};
+
+struct access::object_traits_impl<::User, id_pgsql>::extra_statement_cache_type
 {
-    extra_statement_cache_type(mysql::connection &, image_type &, id_image_type &, mysql::binding &, mysql::binding &)
+    extra_statement_cache_type(pgsql::connection &,
+                               image_type &,
+                               id_image_type &,
+                               pgsql::binding &,
+                               pgsql::binding &,
+                               pgsql::native_binding &,
+                               const unsigned int *)
     {
     }
 };
 
-access::object_traits_impl<::User, id_mysql>::id_type access::object_traits_impl<::User, id_mysql>::id(
+access::object_traits_impl<::User, id_pgsql>::id_type access::object_traits_impl<::User, id_pgsql>::id(
     const id_image_type &i)
 {
-    mysql::database *db(0);
+    pgsql::database *db(0);
     ODB_POTENTIALLY_UNUSED(db);
 
     id_type id;
     {
-        mysql::value_traits<int, mysql::id_long>::set_value(id, i.id_value, i.id_null);
+        pgsql::value_traits<int, pgsql::id_integer>::set_value(id, i.id_value, i.id_null);
     }
 
     return id;
 }
 
-access::object_traits_impl<::User, id_mysql>::id_type access::object_traits_impl<::User, id_mysql>::id(
+access::object_traits_impl<::User, id_pgsql>::id_type access::object_traits_impl<::User, id_pgsql>::id(
     const image_type &i)
 {
-    mysql::database *db(0);
+    pgsql::database *db(0);
     ODB_POTENTIALLY_UNUSED(db);
 
     id_type id;
     {
-        mysql::value_traits<int, mysql::id_long>::set_value(id, i.id_value, i.id_null);
+        pgsql::value_traits<int, pgsql::id_integer>::set_value(id, i.id_value, i.id_null);
     }
 
     return id;
 }
 
-bool access::object_traits_impl<::User, id_mysql>::grow(image_type &i, my_bool *t)
+bool access::object_traits_impl<::User, id_pgsql>::grow(image_type &i, bool *t)
 {
     ODB_POTENTIALLY_UNUSED(i);
     ODB_POTENTIALLY_UNUSED(t);
@@ -100,20 +128,19 @@ bool access::object_traits_impl<::User, id_mysql>::grow(image_type &i, my_bool *
     return grew;
 }
 
-void access::object_traits_impl<::User, id_mysql>::bind(MYSQL_BIND *b, image_type &i, mysql::statement_kind sk)
+void access::object_traits_impl<::User, id_pgsql>::bind(pgsql::bind *b, image_type &i, pgsql::statement_kind sk)
 {
     ODB_POTENTIALLY_UNUSED(sk);
 
-    using namespace mysql;
+    using namespace pgsql;
 
     std::size_t n(0);
 
     // id
     //
-    if (sk != statement_update)
+    if (sk != statement_insert && sk != statement_update)
     {
-        b[n].buffer_type = MYSQL_TYPE_LONG;
-        b[n].is_unsigned = 0;
+        b[n].type = pgsql::bind::integer;
         b[n].buffer = &i.id_value;
         b[n].is_null = &i.id_null;
         n++;
@@ -121,61 +148,49 @@ void access::object_traits_impl<::User, id_mysql>::bind(MYSQL_BIND *b, image_typ
 
     // username
     //
-    b[n].buffer_type = MYSQL_TYPE_STRING;
+    b[n].type = pgsql::bind::text;
     b[n].buffer = i.username_value.data();
-    b[n].buffer_length = static_cast<unsigned long>(i.username_value.capacity());
-    b[n].length = &i.username_size;
+    b[n].capacity = i.username_value.capacity();
+    b[n].size = &i.username_size;
     b[n].is_null = &i.username_null;
     n++;
 
     // passwordHash
     //
-    b[n].buffer_type = MYSQL_TYPE_STRING;
+    b[n].type = pgsql::bind::text;
     b[n].buffer = i.passwordHash_value.data();
-    b[n].buffer_length = static_cast<unsigned long>(i.passwordHash_value.capacity());
-    b[n].length = &i.passwordHash_size;
+    b[n].capacity = i.passwordHash_value.capacity();
+    b[n].size = &i.passwordHash_size;
     b[n].is_null = &i.passwordHash_null;
     n++;
 
     // salt
     //
-    b[n].buffer_type = MYSQL_TYPE_STRING;
+    b[n].type = pgsql::bind::text;
     b[n].buffer = i.salt_value.data();
-    b[n].buffer_length = static_cast<unsigned long>(i.salt_value.capacity());
-    b[n].length = &i.salt_size;
+    b[n].capacity = i.salt_value.capacity();
+    b[n].size = &i.salt_size;
     b[n].is_null = &i.salt_null;
     n++;
 }
 
-void access::object_traits_impl<::User, id_mysql>::bind(MYSQL_BIND *b, id_image_type &i)
+void access::object_traits_impl<::User, id_pgsql>::bind(pgsql::bind *b, id_image_type &i)
 {
     std::size_t n(0);
-    b[n].buffer_type = MYSQL_TYPE_LONG;
-    b[n].is_unsigned = 0;
+    b[n].type = pgsql::bind::integer;
     b[n].buffer = &i.id_value;
     b[n].is_null = &i.id_null;
 }
 
-bool access::object_traits_impl<::User, id_mysql>::init(image_type &i, const object_type &o, mysql::statement_kind sk)
+bool access::object_traits_impl<::User, id_pgsql>::init(image_type &i, const object_type &o, pgsql::statement_kind sk)
 {
     ODB_POTENTIALLY_UNUSED(i);
     ODB_POTENTIALLY_UNUSED(o);
     ODB_POTENTIALLY_UNUSED(sk);
 
-    using namespace mysql;
+    using namespace pgsql;
 
     bool grew(false);
-
-    // id
-    //
-    if (sk == statement_insert)
-    {
-        int const &v = o.id;
-
-        bool is_null(false);
-        mysql::value_traits<int, mysql::id_long>::set_image(i.id_value, is_null, v);
-        i.id_null = is_null;
-    }
 
     // username
     //
@@ -185,9 +200,9 @@ bool access::object_traits_impl<::User, id_mysql>::init(image_type &i, const obj
         bool is_null(false);
         std::size_t size(0);
         std::size_t cap(i.username_value.capacity());
-        mysql::value_traits<::std::string, mysql::id_string>::set_image(i.username_value, size, is_null, v);
+        pgsql::value_traits<::std::string, pgsql::id_string>::set_image(i.username_value, size, is_null, v);
         i.username_null = is_null;
-        i.username_size = static_cast<unsigned long>(size);
+        i.username_size = size;
         grew = grew || (cap != i.username_value.capacity());
     }
 
@@ -199,9 +214,9 @@ bool access::object_traits_impl<::User, id_mysql>::init(image_type &i, const obj
         bool is_null(false);
         std::size_t size(0);
         std::size_t cap(i.passwordHash_value.capacity());
-        mysql::value_traits<::std::string, mysql::id_string>::set_image(i.passwordHash_value, size, is_null, v);
+        pgsql::value_traits<::std::string, pgsql::id_string>::set_image(i.passwordHash_value, size, is_null, v);
         i.passwordHash_null = is_null;
-        i.passwordHash_size = static_cast<unsigned long>(size);
+        i.passwordHash_size = size;
         grew = grew || (cap != i.passwordHash_value.capacity());
     }
 
@@ -213,16 +228,16 @@ bool access::object_traits_impl<::User, id_mysql>::init(image_type &i, const obj
         bool is_null(false);
         std::size_t size(0);
         std::size_t cap(i.salt_value.capacity());
-        mysql::value_traits<::std::string, mysql::id_string>::set_image(i.salt_value, size, is_null, v);
+        pgsql::value_traits<::std::string, pgsql::id_string>::set_image(i.salt_value, size, is_null, v);
         i.salt_null = is_null;
-        i.salt_size = static_cast<unsigned long>(size);
+        i.salt_size = size;
         grew = grew || (cap != i.salt_value.capacity());
     }
 
     return grew;
 }
 
-void access::object_traits_impl<::User, id_mysql>::init(object_type &o, const image_type &i, database *db)
+void access::object_traits_impl<::User, id_pgsql>::init(object_type &o, const image_type &i, database *db)
 {
     ODB_POTENTIALLY_UNUSED(o);
     ODB_POTENTIALLY_UNUSED(i);
@@ -233,7 +248,7 @@ void access::object_traits_impl<::User, id_mysql>::init(object_type &o, const im
     {
         int &v = o.id;
 
-        mysql::value_traits<int, mysql::id_long>::set_value(v, i.id_value, i.id_null);
+        pgsql::value_traits<int, pgsql::id_integer>::set_value(v, i.id_value, i.id_null);
     }
 
     // username
@@ -241,7 +256,7 @@ void access::object_traits_impl<::User, id_mysql>::init(object_type &o, const im
     {
         ::std::string &v = o.username;
 
-        mysql::value_traits<::std::string, mysql::id_string>::set_value(v,
+        pgsql::value_traits<::std::string, pgsql::id_string>::set_value(v,
                                                                         i.username_value,
                                                                         i.username_size,
                                                                         i.username_null);
@@ -252,7 +267,7 @@ void access::object_traits_impl<::User, id_mysql>::init(object_type &o, const im
     {
         ::std::string &v = o.passwordHash;
 
-        mysql::value_traits<::std::string, mysql::id_string>::set_value(v,
+        pgsql::value_traits<::std::string, pgsql::id_string>::set_value(v,
                                                                         i.passwordHash_value,
                                                                         i.passwordHash_size,
                                                                         i.passwordHash_null);
@@ -263,63 +278,64 @@ void access::object_traits_impl<::User, id_mysql>::init(object_type &o, const im
     {
         ::std::string &v = o.salt;
 
-        mysql::value_traits<::std::string, mysql::id_string>::set_value(v, i.salt_value, i.salt_size, i.salt_null);
+        pgsql::value_traits<::std::string, pgsql::id_string>::set_value(v, i.salt_value, i.salt_size, i.salt_null);
     }
 }
 
-void access::object_traits_impl<::User, id_mysql>::init(id_image_type &i, const id_type &id)
+void access::object_traits_impl<::User, id_pgsql>::init(id_image_type &i, const id_type &id)
 {
     {
         bool is_null(false);
-        mysql::value_traits<int, mysql::id_long>::set_image(i.id_value, is_null, id);
+        pgsql::value_traits<int, pgsql::id_integer>::set_image(i.id_value, is_null, id);
         i.id_null = is_null;
     }
 }
 
-const char access::object_traits_impl<::User, id_mysql>::persist_statement[] = "INSERT INTO `User` "
-                                                                               "(`id`, "
-                                                                               "`username`, "
-                                                                               "`passwordHash`, "
-                                                                               "`salt`) "
+const char access::object_traits_impl<::User, id_pgsql>::persist_statement[] = "INSERT INTO \"User\" "
+                                                                               "(\"id\", "
+                                                                               "\"username\", "
+                                                                               "\"passwordHash\", "
+                                                                               "\"salt\") "
                                                                                "VALUES "
-                                                                               "(?, ?, ?, ?)";
+                                                                               "(DEFAULT, $1, $2, $3) "
+                                                                               "RETURNING \"id\"";
 
-const char access::object_traits_impl<::User, id_mysql>::find_statement[] = "SELECT "
-                                                                            "`User`.`id`, "
-                                                                            "`User`.`username`, "
-                                                                            "`User`.`passwordHash`, "
-                                                                            "`User`.`salt` "
-                                                                            "FROM `User` "
-                                                                            "WHERE `User`.`id`=?";
+const char access::object_traits_impl<::User, id_pgsql>::find_statement[] = "SELECT "
+                                                                            "\"User\".\"id\", "
+                                                                            "\"User\".\"username\", "
+                                                                            "\"User\".\"passwordHash\", "
+                                                                            "\"User\".\"salt\" "
+                                                                            "FROM \"User\" "
+                                                                            "WHERE \"User\".\"id\"=$1";
 
-const char access::object_traits_impl<::User, id_mysql>::update_statement[] = "UPDATE `User` "
+const char access::object_traits_impl<::User, id_pgsql>::update_statement[] = "UPDATE \"User\" "
                                                                               "SET "
-                                                                              "`username`=?, "
-                                                                              "`passwordHash`=?, "
-                                                                              "`salt`=? "
-                                                                              "WHERE `id`=?";
+                                                                              "\"username\"=$1, "
+                                                                              "\"passwordHash\"=$2, "
+                                                                              "\"salt\"=$3 "
+                                                                              "WHERE \"id\"=$4";
 
-const char access::object_traits_impl<::User, id_mysql>::erase_statement[] = "DELETE FROM `User` "
-                                                                             "WHERE `id`=?";
+const char access::object_traits_impl<::User, id_pgsql>::erase_statement[] = "DELETE FROM \"User\" "
+                                                                             "WHERE \"id\"=$1";
 
-const char access::object_traits_impl<::User, id_mysql>::query_statement[] = "SELECT "
-                                                                             "`User`.`id`, "
-                                                                             "`User`.`username`, "
-                                                                             "`User`.`passwordHash`, "
-                                                                             "`User`.`salt` "
-                                                                             "FROM `User`";
+const char access::object_traits_impl<::User, id_pgsql>::query_statement[] = "SELECT "
+                                                                             "\"User\".\"id\", "
+                                                                             "\"User\".\"username\", "
+                                                                             "\"User\".\"passwordHash\", "
+                                                                             "\"User\".\"salt\" "
+                                                                             "FROM \"User\"";
 
-const char access::object_traits_impl<::User, id_mysql>::erase_query_statement[] = "DELETE FROM `User`";
+const char access::object_traits_impl<::User, id_pgsql>::erase_query_statement[] = "DELETE FROM \"User\"";
 
-const char access::object_traits_impl<::User, id_mysql>::table_name[] = "`User`";
+const char access::object_traits_impl<::User, id_pgsql>::table_name[] = "\"User\"";
 
-void access::object_traits_impl<::User, id_mysql>::persist(database &db, object_type &obj)
+void access::object_traits_impl<::User, id_pgsql>::persist(database &db, object_type &obj)
 {
     ODB_POTENTIALLY_UNUSED(db);
 
-    using namespace mysql;
+    using namespace pgsql;
 
-    mysql::connection &conn(mysql::transaction::current().connection());
+    pgsql::connection &conn(pgsql::transaction::current().connection());
     statements_type &sts(conn.statement_cache().find_object<object_type>());
 
     callback(db, static_cast<const object_type &>(obj), callback_event::pre_persist);
@@ -329,8 +345,6 @@ void access::object_traits_impl<::User, id_mysql>::persist(database &db, object_
 
     if (init(im, obj, statement_insert))
         im.version++;
-
-    im.id_value = 0;
 
     if (im.version != sts.insert_image_version() || imb.version == 0)
     {
@@ -359,17 +373,17 @@ void access::object_traits_impl<::User, id_mysql>::persist(database &db, object_
     callback(db, static_cast<const object_type &>(obj), callback_event::post_persist);
 }
 
-void access::object_traits_impl<::User, id_mysql>::update(database &db, const object_type &obj)
+void access::object_traits_impl<::User, id_pgsql>::update(database &db, const object_type &obj)
 {
     ODB_POTENTIALLY_UNUSED(db);
 
-    using namespace mysql;
-    using mysql::update_statement;
+    using namespace pgsql;
+    using pgsql::update_statement;
 
     callback(db, obj, callback_event::pre_update);
 
-    mysql::transaction &tr(mysql::transaction::current());
-    mysql::connection &conn(tr.connection());
+    pgsql::transaction &tr(pgsql::transaction::current());
+    pgsql::connection &conn(tr.connection());
     statements_type &sts(conn.statement_cache().find_object<object_type>());
 
     const id_type &id(obj.id);
@@ -414,13 +428,13 @@ void access::object_traits_impl<::User, id_mysql>::update(database &db, const ob
     pointer_cache_traits::update(db, obj);
 }
 
-void access::object_traits_impl<::User, id_mysql>::erase(database &db, const id_type &id)
+void access::object_traits_impl<::User, id_pgsql>::erase(database &db, const id_type &id)
 {
-    using namespace mysql;
+    using namespace pgsql;
 
     ODB_POTENTIALLY_UNUSED(db);
 
-    mysql::connection &conn(mysql::transaction::current().connection());
+    pgsql::connection &conn(pgsql::transaction::current().connection());
     statements_type &sts(conn.statement_cache().find_object<object_type>());
 
     id_image_type &i(sts.id_image());
@@ -440,11 +454,11 @@ void access::object_traits_impl<::User, id_mysql>::erase(database &db, const id_
     pointer_cache_traits::erase(db, id);
 }
 
-access::object_traits_impl<::User, id_mysql>::pointer_type access::object_traits_impl<::User, id_mysql>::find(
+access::object_traits_impl<::User, id_pgsql>::pointer_type access::object_traits_impl<::User, id_pgsql>::find(
     database &db,
     const id_type &id)
 {
-    using namespace mysql;
+    using namespace pgsql;
 
     {
         pointer_type p(pointer_cache_traits::find(db, id));
@@ -453,7 +467,7 @@ access::object_traits_impl<::User, id_mysql>::pointer_type access::object_traits
             return p;
     }
 
-    mysql::connection &conn(mysql::transaction::current().connection());
+    pgsql::connection &conn(pgsql::transaction::current().connection());
     statements_type &sts(conn.statement_cache().find_object<object_type>());
 
     statements_type::auto_lock l(sts);
@@ -492,11 +506,11 @@ access::object_traits_impl<::User, id_mysql>::pointer_type access::object_traits
     return p;
 }
 
-bool access::object_traits_impl<::User, id_mysql>::find(database &db, const id_type &id, object_type &obj)
+bool access::object_traits_impl<::User, id_pgsql>::find(database &db, const id_type &id, object_type &obj)
 {
-    using namespace mysql;
+    using namespace pgsql;
 
-    mysql::connection &conn(mysql::transaction::current().connection());
+    pgsql::connection &conn(pgsql::transaction::current().connection());
     statements_type &sts(conn.statement_cache().find_object<object_type>());
 
     statements_type::auto_lock l(sts);
@@ -521,11 +535,11 @@ bool access::object_traits_impl<::User, id_mysql>::find(database &db, const id_t
     return true;
 }
 
-bool access::object_traits_impl<::User, id_mysql>::reload(database &db, object_type &obj)
+bool access::object_traits_impl<::User, id_pgsql>::reload(database &db, object_type &obj)
 {
-    using namespace mysql;
+    using namespace pgsql;
 
-    mysql::connection &conn(mysql::transaction::current().connection());
+    pgsql::connection &conn(pgsql::transaction::current().connection());
     statements_type &sts(conn.statement_cache().find_object<object_type>());
 
     statements_type::auto_lock l(sts);
@@ -547,9 +561,9 @@ bool access::object_traits_impl<::User, id_mysql>::reload(database &db, object_t
     return true;
 }
 
-bool access::object_traits_impl<::User, id_mysql>::find_(statements_type &sts, const id_type *id)
+bool access::object_traits_impl<::User, id_pgsql>::find_(statements_type &sts, const id_type *id)
 {
-    using namespace mysql;
+    using namespace pgsql;
 
     id_image_type &i(sts.id_image());
     init(i, *id);
@@ -595,15 +609,15 @@ bool access::object_traits_impl<::User, id_mysql>::find_(statements_type &sts, c
     return r != select_statement::no_data;
 }
 
-result<access::object_traits_impl<::User, id_mysql>::object_type> access::object_traits_impl<::User, id_mysql>::query(
+result<access::object_traits_impl<::User, id_pgsql>::object_type> access::object_traits_impl<::User, id_pgsql>::query(
     database &,
     const query_base_type &q)
 {
-    using namespace mysql;
+    using namespace pgsql;
     using odb::details::shared;
     using odb::details::shared_ptr;
 
-    mysql::connection &conn(mysql::transaction::current().connection());
+    pgsql::connection &conn(pgsql::transaction::current().connection());
 
     statements_type &sts(conn.statement_cache().find_object<object_type>());
 
@@ -625,22 +639,30 @@ result<access::object_traits_impl<::User, id_mysql>::object_type> access::object
     }
 
     q.init_parameters();
-    shared_ptr<select_statement> st(new (shared)
-                                        select_statement(conn, text, false, true, q.parameters_binding(), imb));
+    shared_ptr<select_statement> st(new (shared) select_statement(sts.connection(),
+                                                                  query_statement_name,
+                                                                  text,
+                                                                  false,
+                                                                  true,
+                                                                  q.parameter_types(),
+                                                                  q.parameter_count(),
+                                                                  q.parameters_binding(),
+                                                                  imb));
 
     st->execute();
+    st->deallocate();
 
     shared_ptr<odb::object_result_impl<object_type>> r(new (shared)
-                                                           mysql::object_result_impl<object_type>(q, st, sts, 0));
+                                                           pgsql::object_result_impl<object_type>(q, st, sts, 0));
 
     return result<object_type>(r);
 }
 
-unsigned long long access::object_traits_impl<::User, id_mysql>::erase_query(database &, const query_base_type &q)
+unsigned long long access::object_traits_impl<::User, id_pgsql>::erase_query(database &, const query_base_type &q)
 {
-    using namespace mysql;
+    using namespace pgsql;
 
-    mysql::connection &conn(mysql::transaction::current().connection());
+    pgsql::connection &conn(pgsql::transaction::current().connection());
 
     std::string text(erase_query_statement);
     if (!q.empty())
@@ -650,7 +672,12 @@ unsigned long long access::object_traits_impl<::User, id_mysql>::erase_query(dat
     }
 
     q.init_parameters();
-    delete_statement st(conn, text, q.parameters_binding());
+    delete_statement st(conn,
+                        erase_query_statement_name,
+                        text,
+                        q.parameter_types(),
+                        q.parameter_count(),
+                        q.parameters_binding());
 
     return st.execute();
 }

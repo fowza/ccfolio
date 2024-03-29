@@ -1,6 +1,6 @@
-#include "SharedState.h"
 #include <Listener.h>
 #include <OdbRepository.h>
+#include <SharedState.h>
 #include <TestController.h>
 #include <UserController.h>
 #include <UserRepository.h>
@@ -18,15 +18,14 @@
 int main()
 {
     // Create the database
-    std::shared_ptr<odb::mysql::database> db(new odb::mysql::database(std::string(mysql_user),
-                                                                      std::string(mysql_password),
-                                                                      std::string(mysql_database),
-                                                                      std::string(mysql_host),
-                                                                      3306));
+    std::shared_ptr<odb::pgsql::database> db(new odb::pgsql::database(std::string(pg_user),
+                                                                      std::string(pg_password),
+                                                                      std::string(pg_database),
+                                                                      std::string(pg_host),
+                                                                      5432));
 
-    auto serverAddress = net::ip::make_address("127.0.0.1");
-    auto serverPort = static_cast<unsigned short>(std::atoi("7004"));
-    auto doc_root = "/var/www/";
+    auto serverAddress = net::ip::make_address(std::string(server_address));
+    auto serverPort = static_cast<unsigned short>(std::atoi(std::string(server_port).c_str()));
     auto workerThreads = std::max<int>(1, std::atoi("4"));
 
     net::io_context ioContext;
@@ -44,7 +43,7 @@ int main()
 
     boost::make_shared<Listener>(ioContext,
                                  tcp::endpoint{serverAddress, serverPort},
-                                 boost::make_shared<SharedState>(doc_root),
+                                 boost::make_shared<SharedState>(std::string(doc_root)),
                                  httpRouter)
         ->run();
     std::cout << "Server listening on " << serverAddress << ":" << serverPort << std::endl;

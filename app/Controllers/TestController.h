@@ -12,7 +12,7 @@
 #ifndef TEST_CONTROLLER_H
 #define TEST_CONTROLLER_H
 
-#include "AuthMiddleware.h"
+#include "AuthenticationMiddleware.h"
 #include "LogService.h"
 #include <Router.h>
 #include <fmt/format.h>
@@ -29,7 +29,7 @@ public:
     {
         router->addRoute("POST",
                          "/test",
-                         AuthMiddleware::withAuthentication(
+                         AuthenticationMiddleware::WithAuthentication(
                              [this](const HttpRequest &req, HttpResponse &res) { this->handleHelloWorld(req, res); }));
     }
 

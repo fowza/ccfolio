@@ -5,6 +5,7 @@
 #ifndef CCFOLIO_SHAREDSTATE_H
 #define CCFOLIO_SHAREDSTATE_H
 
+//#include "ChatRoom.h"
 #include <boost/smart_ptr.hpp>
 #include <memory>
 #include <mutex>

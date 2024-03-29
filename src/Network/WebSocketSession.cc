@@ -36,7 +36,9 @@ void WebSocketSession::on_read(beast::error_code ec, std::size_t)
     if (ec)
         return fail(ec, "read");
 
-    state_->send(beast::buffers_to_string(buffer_.data()));
+    auto message = beast::buffers_to_string(buffer_.data());
+
+    // TODO: Parse the message for commands
 
     buffer_.consume(buffer_.size());
 

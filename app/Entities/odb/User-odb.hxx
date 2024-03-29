@@ -72,82 +72,82 @@ public:
 
 #include <odb/details/buffer.hxx>
 
-#include <odb/mysql/binding.hxx>
-#include <odb/mysql/forward.hxx>
-#include <odb/mysql/mysql-types.hxx>
-#include <odb/mysql/query.hxx>
-#include <odb/mysql/version.hxx>
+#include <odb/pgsql/binding.hxx>
+#include <odb/pgsql/forward.hxx>
+#include <odb/pgsql/pgsql-types.hxx>
+#include <odb/pgsql/query.hxx>
+#include <odb/pgsql/version.hxx>
 
 namespace odb
 {
 // User
 //
 template <typename A>
-struct query_columns<::User, id_mysql, A>
+struct query_columns<::User, id_pgsql, A>
 {
     // id
     //
-    typedef mysql::query_column<mysql::value_traits<int, mysql::id_long>::query_type, mysql::id_long> id_type_;
+    typedef pgsql::query_column<pgsql::value_traits<int, pgsql::id_integer>::query_type, pgsql::id_integer> id_type_;
 
     static const id_type_ id;
 
     // username
     //
-    typedef mysql::query_column<mysql::value_traits<::std::string, mysql::id_string>::query_type, mysql::id_string>
+    typedef pgsql::query_column<pgsql::value_traits<::std::string, pgsql::id_string>::query_type, pgsql::id_string>
         username_type_;
 
     static const username_type_ username;
 
     // passwordHash
     //
-    typedef mysql::query_column<mysql::value_traits<::std::string, mysql::id_string>::query_type, mysql::id_string>
+    typedef pgsql::query_column<pgsql::value_traits<::std::string, pgsql::id_string>::query_type, pgsql::id_string>
         passwordHash_type_;
 
     static const passwordHash_type_ passwordHash;
 
     // salt
     //
-    typedef mysql::query_column<mysql::value_traits<::std::string, mysql::id_string>::query_type, mysql::id_string>
+    typedef pgsql::query_column<pgsql::value_traits<::std::string, pgsql::id_string>::query_type, pgsql::id_string>
         salt_type_;
 
     static const salt_type_ salt;
 };
 
 template <typename A>
-const typename query_columns<::User, id_mysql, A>::id_type_ query_columns<::User, id_mysql, A>::id(A::table_name,
-                                                                                                   "`id`",
+const typename query_columns<::User, id_pgsql, A>::id_type_ query_columns<::User, id_pgsql, A>::id(A::table_name,
+                                                                                                   "\"id\"",
                                                                                                    0);
 
 template <typename A>
-const typename query_columns<::User, id_mysql, A>::username_type_ query_columns<::User, id_mysql, A>::username(
+const typename query_columns<::User, id_pgsql, A>::username_type_ query_columns<::User, id_pgsql, A>::username(
     A::table_name,
-    "`username`",
+    "\"username\"",
     0);
 
 template <typename A>
-const typename query_columns<::User, id_mysql, A>::passwordHash_type_ query_columns<::User, id_mysql, A>::passwordHash(
+const typename query_columns<::User, id_pgsql, A>::passwordHash_type_ query_columns<::User, id_pgsql, A>::passwordHash(
     A::table_name,
-    "`passwordHash`",
+    "\"passwordHash\"",
     0);
 
 template <typename A>
-const typename query_columns<::User, id_mysql, A>::salt_type_ query_columns<::User, id_mysql, A>::salt(A::table_name,
-                                                                                                       "`salt`",
+const typename query_columns<::User, id_pgsql, A>::salt_type_ query_columns<::User, id_pgsql, A>::salt(A::table_name,
+                                                                                                       "\"salt\"",
                                                                                                        0);
 
 template <typename A>
-struct pointer_query_columns<::User, id_mysql, A> : query_columns<::User, id_mysql, A>
+struct pointer_query_columns<::User, id_pgsql, A> : query_columns<::User, id_pgsql, A>
 {
 };
 
 template <>
-class access::object_traits_impl<::User, id_mysql> : public access::object_traits<::User>
+class access::object_traits_impl<::User, id_pgsql> : public access::object_traits<::User>
 {
 public:
     struct id_image_type
     {
         int id_value;
-        my_bool id_null;
+        bool id_null;
 
         std::size_t version;
     };
@@ -157,25 +157,25 @@ public:
         // id
         //
         int id_value;
-        my_bool id_null;
+        bool id_null;
 
         // username
         //
         details::buffer username_value;
-        unsigned long username_size;
-        my_bool username_null;
+        std::size_t username_size;
+        bool username_null;
 
         // passwordHash
         //
         details::buffer passwordHash_value;
-        unsigned long passwordHash_size;
-        my_bool passwordHash_null;
+        std::size_t passwordHash_size;
+        bool passwordHash_null;
 
         // salt
         //
         details::buffer salt_value;
-        unsigned long salt_size;
-        my_bool salt_null;
+        std::size_t salt_size;
+        bool salt_null;
 
         std::size_t version;
     };
@@ -188,21 +188,21 @@ public:
 
     static id_type id(const image_type &);
 
-    static bool grow(image_type &, my_bool *);
+    static bool grow(image_type &, bool *);
 
-    static void bind(MYSQL_BIND *, image_type &, mysql::statement_kind);
+    static void bind(pgsql::bind *, image_type &, pgsql::statement_kind);
 
-    static void bind(MYSQL_BIND *, id_image_type &);
+    static void bind(pgsql::bind *, id_image_type &);
 
-    static bool init(image_type &, const object_type &, mysql::statement_kind);
+    static bool init(image_type &, const object_type &, pgsql::statement_kind);
 
     static void init(object_type &, const image_type &, database *);
 
     static void init(id_image_type &, const id_type &);
 
-    typedef mysql::object_statements<object_type> statements_type;
+    typedef pgsql::object_statements<object_type> statements_type;
 
-    typedef mysql::query_base query_base_type;
+    typedef pgsql::query_base query_base_type;
 
     static const std::size_t column_count = 4UL;
     static const std::size_t id_column_count = 1UL;
@@ -242,6 +242,17 @@ public:
 
     static unsigned long long erase_query(database &, const query_base_type &);
 
+    static const char persist_statement_name[];
+    static const char find_statement_name[];
+    static const char update_statement_name[];
+    static const char erase_statement_name[];
+    static const char query_statement_name[];
+    static const char erase_query_statement_name[];
+
+    static const unsigned int persist_statement_types[];
+    static const unsigned int find_statement_types[];
+    static const unsigned int update_statement_types[];
+
 public:
     static bool find_(statements_type &, const id_type *);
 
@@ -249,7 +260,7 @@ public:
 };
 
 template <>
-class access::object_traits_impl<::User, id_common> : public access::object_traits_impl<::User, id_mysql>
+class access::object_traits_impl<::User, id_common> : public access::object_traits_impl<::User, id_pgsql>
 {
 };
 

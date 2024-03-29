@@ -22,16 +22,16 @@
 #include <odb/database.hxx>
 #include <odb/exception.hxx>
 #include <odb/exceptions.hxx>
-#include <odb/mysql/database.hxx>
+#include <odb/pgsql/database.hxx>
 #include <odb/transaction.hxx>
 
 template <typename T, typename IdType = int>
 class OdbRepository : public IRepository<T, IdType>
 {
-    std::shared_ptr<odb::mysql::database> db;
+    std::shared_ptr<odb::pgsql::database> db;
 
 public:
-    explicit OdbRepository(std::shared_ptr<odb::mysql::database> db) : db(std::move(db))
+    explicit OdbRepository(std::shared_ptr<odb::pgsql::database> db) : db(std::move(db))
     {
     }
 
@@ -53,12 +53,12 @@ public:
         catch (const odb::connection_lost &e)
         {
             LOG(LogService::LogLevel::ERROR, e.what());
-            return OperationResult<bool>::FailureResult(e.what());
+            return OperationResult<bool>::FailureResult("Something happened, please try again later.");
         }
         catch (const std::exception &e)
         {
             LOG(LogService::LogLevel::ERROR, e.what());
-            return OperationResult<bool>::FailureResult(e.what());
+            return OperationResult<bool>::FailureResult("Something happened, please try again later.");
         }
     }
 
@@ -80,12 +80,12 @@ public:
         catch (const odb::connection_lost &e)
         {
             LOG(LogService::LogLevel::ERROR, e.what());
-            return OperationResult<T>::FailureResult(e.what());
+            return OperationResult<T>::FailureResult("Something happened, please try again later.");
         }
         catch (const std::exception &e)
         {
             LOG(LogService::LogLevel::ERROR, e.what());
-            return OperationResult<T>::FailureResult(e.what());
+            return OperationResult<T>::FailureResult("Something happened, please try again later.");
         }
     }
 
@@ -107,12 +107,12 @@ public:
         catch (const odb::connection_lost &e)
         {
             LOG(LogService::LogLevel::ERROR, e.what());
-            return OperationResult<bool>::FailureResult(e.what());
+            return OperationResult<bool>::FailureResult("Something happened, please try again later.");
         }
         catch (const std::exception &e)
         {
             LOG(LogService::LogLevel::ERROR, e.what());
-            return OperationResult<bool>::FailureResult(e.what());
+            return OperationResult<bool>::FailureResult("Something happened, please try again later.");
         }
     }
 
@@ -134,12 +134,12 @@ public:
         catch (const odb::connection_lost &e)
         {
             LOG(LogService::LogLevel::ERROR, e.what());
-            return OperationResult<bool>::FailureResult(e.what());
+            return OperationResult<bool>::FailureResult("Something happened, please try again later.");
         }
         catch (const std::exception &e)
         {
             LOG(LogService::LogLevel::ERROR, e.what());
-            return OperationResult<bool>::FailureResult(e.what());
+            return OperationResult<bool>::FailureResult("Something happened, please try again later.");
         }
     }
 
@@ -165,16 +165,16 @@ public:
         catch (const odb::connection_lost &e)
         {
             LOG(LogService::LogLevel::ERROR, e.what());
-            return OperationResult<std::vector<T>>::FailureResult(e.what());
+            return OperationResult<std::vector<T>>::FailureResult("Something happened, please try again later.");
         }
         catch (const std::exception &e)
         {
             LOG(LogService::LogLevel::ERROR, e.what());
-            return OperationResult<std::vector<T>>::FailureResult(e.what());
+            return OperationResult<std::vector<T>>::FailureResult("Something happened, please try again later.");
         }
     }
 
-    std::shared_ptr<odb::mysql::database> database() const
+    std::shared_ptr<odb::pgsql::database> database() const
     {
         return db;
     }

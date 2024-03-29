@@ -1,28 +1,47 @@
-/**
- * @file AuthMiddleware.h
- * @author Frederik Pedersen
- * @brief Middlware for verifying jwt tokens
- * @version 0.1
- * @date 2024-03-03
- *
- * @copyright Copyright (c) 2024
- *
- */
-#ifndef AUTHENTICATIONMIDDLEWARE_H
-#define AUTHENTICATIONMIDDLEWARE_H
+//
+// Created by fred on 3/29/24.
+//
 
-#include "LogService.h"
-#include "config.hpp"
-#include <Router.h>
-#include <fmt/format.h>
+#include "JWTHelper.h"
+#include <LogService.h>
+#include <config.hpp>
 #include <jwt-cpp/jwt.h>
-#include <memory>
 
-namespace AuthMiddleware
-{
 /// @brief The secret key used for signing and verifying tokens
 const std::string secretKey = std::string(secret_key);
 const std::string issuer = std::string(project_name);
+
+/**
+     * @brief Create a JWT token for a user
+     *
+     * @param userDto The user to create the token for
+     * @return std::string The JWT token
+     */
+std::string JWTHelper::CreateJWTToken(const std::string &username)
+{
+    try
+    {
+        const std::string secretKey = std::string(secret_key);
+        const std::string issuer = std::string(project_name);
+        auto now = std::chrono::system_clock::now();
+        auto expTime = now + std::chrono::minutes(3);
+
+        auto token = jwt::create()
+                         .set_type("JWS")
+                         .set_issuer(issuer)
+                         .set_issued_at(now)
+                         .set_expires_at(expTime)
+                         .set_payload_claim("username", jwt::claim(username))
+                         .sign(jwt::algorithm::hs256{secretKey});
+
+        return std::string(token);
+    }
+    catch (const std::exception &e)
+    {
+        LOG(LogService::LogLevel::ERROR, e.what());
+        throw std::runtime_error("Error while trying to create JWT token");
+    }
+}
 
 /**
      * @brief Verifies a jwt token
@@ -30,7 +49,7 @@ const std::string issuer = std::string(project_name);
      * @param token The token to verify
      * @return true if the token is valid, false otherwise
      */
-bool verifyToken(const std::string &token)
+bool JWTHelper::VerifyToken(const std::string &token)
 {
     try
     {
@@ -54,7 +73,7 @@ bool verifyToken(const std::string &token)
      * @param response The response to send if the token is invalid
      * @return true if the token is valid, false otherwise
      */
-bool validateToken(const HttpRequest &req, HttpResponse &res)
+bool JWTHelper::ValidateToken(const HttpRequest &req, HttpResponse &res)
 {
     try
     {
@@ -79,7 +98,7 @@ bool validateToken(const HttpRequest &req, HttpResponse &res)
         }
         token = token.substr(7); // Remove "Bearer " prefix
 
-        if (!verifyToken(token))
+        if (!VerifyToken(token))
         {
             res.result(http::status::unauthorized);
             res.set(http::field::content_type, "application/json");
@@ -96,31 +115,3 @@ bool validateToken(const HttpRequest &req, HttpResponse &res)
     }
     return false;
 }
-
-
-/**
-     * @brief Middleware for verifying jwt tokens
-     *
-     * @param func The function to call if the token is valid
-     * @return A handler that calls the given function if the token is valid
-     */
-auto withAuthentication(Handler func) -> Handler
-{
-    return [func](const HttpRequest &req, HttpResponse &res) {
-        if (!validateToken(req, res))
-        {
-            res.result(http::status::unauthorized);
-            res.set(http::field::content_type, "application/json");
-            res.body() = "Invalid or missing token";
-            res.prepare_payload();
-            return;
-        }
-        func(req, res);
-    };
-}
-
-
-} // namespace AuthMiddleware
-
-
-#endif

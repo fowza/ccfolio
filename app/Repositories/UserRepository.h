@@ -65,7 +65,7 @@ public:
         catch (const odb::exception &e)
         {
             LOG(LogService::LogLevel::ERROR, e.what());
-            return OperationResult<User>::FailureResult(e.what());
+            return OperationResult<User>::FailureResult("Something happened, please try again later");
         }
     }
 
@@ -96,7 +96,7 @@ public:
         catch (const std::exception &e)
         {
             LOG(LogService::LogLevel::ERROR, e.what());
-            return OperationResult<std::optional<User>>::FailureResult(e.what());
+            return OperationResult<std::optional<User>>::FailureResult("Something happened, please try again later");
         }
     }
 };

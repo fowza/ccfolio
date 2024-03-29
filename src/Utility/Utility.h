@@ -25,6 +25,11 @@ public:
     Utility();
     ~Utility();
 
+    /**
+     * Convert a vector of bytes to a hex string
+     * @param bytes std::vector<uint8_t>
+     * @return std::string
+     */
     static std::string toHexString(const std::vector<uint8_t> &bytes)
     {
         std::stringstream hexStream;
@@ -36,6 +41,11 @@ public:
         return hexStream.str();
     }
 
+    /**
+     * Convert a hex string to a vector of bytes
+     * @param hex std::string
+     * @return std::vector<uint8_t>
+     */
     static std::vector<uint8_t> fromHexString(const std::string &hex)
     {
         std::vector<uint8_t> bytes;
