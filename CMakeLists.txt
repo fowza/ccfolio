@@ -30,7 +30,7 @@ option(ENABLE_LTO "Enable to add Link Time Optimization." ON)
 
 set(LIBRARY_NAME "lib")
 set(UNIT_TEST_NAME "unit_tests")
-set(EXECUTABLE_NAME "ccfolio-exe")
+set(EXECUTABLE_NAME "ccfolio-api")
 
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake/)
 include(env)
@@ -72,11 +72,12 @@ cpmaddpackage("gh:gabime/spdlog@1.11.0")
 cpmaddpackage("gh:Thalhammer/jwt-cpp@0.7.0")
 
 find_package(ODB REQUIRED
-    COMPONENTS mysql sqlite)
+    COMPONENTS pgsql)
 include(${ODB_USE_FILE})
 
+find_package(Boost 1.71.0 REQUIRED COMPONENTS system thread)
+
 find_package(PkgConfig)
-pkg_check_modules(Pistache REQUIRED IMPORTED_TARGET libpistache)
 pkg_check_modules(ARGON2 REQUIRED libargon2)
 
 # SUB DIRECTORIES

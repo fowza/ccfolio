@@ -5,8 +5,6 @@ services:
     build: .
     ports:
       - "7001:7001"
-    volumes:
-      - ./Cert:/certs
     networks:
       - webnet
 
@@ -16,7 +14,6 @@ services:
       - "443:443"
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf
-      - ./Cert:/etc/nginx/certs
     depends_on:
       - ccfolio-api
     networks:

@@ -1,3 +1,9 @@
+# Load environment variables
+ifneq (,$(wildcard ./.env))
+    include .env
+    export
+endif
+
 # Command shortcuts
 DOCKER_COMPOSE_CMD := sudo docker-compose
 DOCKER_CMD := sudo docker
@@ -10,8 +16,16 @@ MAKE_CMD := make
 # Package lists
 BASIC_PACKAGES := gcc g++ $(CMAKE_CMD) $(MAKE_CMD) doxygen graphviz clang-format git llvm pkg-config curl zip unzip tar python3-dev python3-pip clang-tidy meson ninja-build
 TEST_PACKAGES := gcovr lcov
-DEVELOPMENT_PACKAGES := libpistache-dev odb gcovr lcov libsqlite3-dev libargon2-dev libmysqlclient-dev
+DEVELOPMENT_PACKAGES := odb gcovr lcov libsqlite3-dev libargon2-dev libmysqlclient-dev libboost-all-dev
 PYTHON_PACKAGES := pre-commit cmake-format
+
+# PostgreSQL settings
+PG_IMAGE := postgres:latest
+PG_CONTAINER := postgres-api
+PG_PORT := 5432
+PG_USER := $(PG_USER)
+PG_PASSWORD := $(PG_PASSWORD)
+PG_DATA_VOLUME := postgres-data
 
 # Directories
 BUILD_DIR := build
@@ -41,7 +55,7 @@ tests:
 # Install development dependencies
 dependencies:
 	@echo "Installing development dependencies..."
-	sudo add-apt-repository ppa:pistache+team/unstable && $(APT_CMD) update
+	$(APT_CMD) update
 	$(APT_GET_CMD) install -y $(DEVELOPMENT_PACKAGES)
 
 # Install and setup Python-based tools (pre-commit, cmake-format)
@@ -76,4 +90,13 @@ dependency_graph:
 # Generate ODB schema
 odb_schema:
 	@echo "Generating ODB schema..."
-	odb --std c++11 --database mysql --generate-query --generate-schema -o ./src/Domain/Entities/odb/ ./src/Domain/Entities/User.h
+	odb --std c++11 --database pgsql --generate-query --generate-schema -o ./app/Entities/odb/ ./app/Entities/User.h
+
+db-up:
+	docker run -d --name $(PG_CONTAINER) -e POSTGRES_USER=$(PG_USER) -e POSTGRES_PASSWORD=$(PG_PASSWORD) -p $(PG_PORT):5432 -v $(PG_DATA_VOLUME):/var/lib/postgresql/data $(PG_IMAGE)
+
+db-down:
+	docker stop $(PG_CONTAINER) && docker rm $(PG_CONTAINER)
+
+db-shell:
+	docker exec -it $(PG_CONTAINER) psql -U $(PG_USER)

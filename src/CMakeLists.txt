@@ -1,41 +1,56 @@
-add_subdirectory(Core)
-add_subdirectory(Domain)
-add_subdirectory(Application)
-add_subdirectory(Infrastructure)
-add_subdirectory(Presentation)
+add_library(${LIBRARY_NAME} STATIC)
 
-add_library(${LIBRARY_NAME} INTERFACE)
+file(GLOB_RECURSE SOURCES
+        ${CMAKE_CURRENT_SOURCE_DIR}/Network/*.cc
+        ../app/Middleware/*.cc
+        ${CMAKE_CURRENT_SOURCE_DIR}/Utility/*.cc
+        ${CMAKE_CURRENT_SOURCE_DIR}/Security/*.cc
+)
+
+target_sources(${LIBRARY_NAME} PRIVATE ${SOURCES})
+
+target_include_directories(${LIBRARY_NAME} PUBLIC
+        # Root
+        ${CMAKE_CURRENT_SOURCE_DIR}/Network
+        ../app/Middleware
+        ${CMAKE_CURRENT_SOURCE_DIR}/Utility
+        ${CMAKE_CURRENT_SOURCE_DIR}/Security
+        ${CMAKE_BINARY_DIR}/configured_files/include/
+
+        # External
+        ${Boost_INCLUDE_DIRS}
+        ${ODB_INCLUDE_DIRS}
+        ${ARGON2_INCLUDE_DIRS}
+)
 
 target_link_libraries(${LIBRARY_NAME}
-INTERFACE
-        CoreLib
-        DomainLib
-        ApplicationLib
-        InfrastructureLib
-        PresentationLib
+        PUBLIC
         nlohmann_json::nlohmann_json
         fmt::fmt
         spdlog::spdlog
         cxxopts::cxxopts
-        PkgConfig::Pistache
+        ${Boost_LIBRARIES}
+        ${ODB_LIBRARIES}
+        ${ARGON2_LIBRARIES}
+        jwt-cpp
 )
 
 if(${ENABLE_WARNINGS})
     target_set_warnings(
-        TARGET
-        ${LIBRARY_NAME}
-        ENABLE
-        ${ENABLE_WARNINGS}
-        AS_ERRORS
-        ${ENABLE_WARNINGS_AS_ERRORS})
+            TARGET
+            ${LIBRARY_NAME}
+            ENABLE
+            ${ENABLE_WARNINGS}
+            AS_ERRORS
+            ${ENABLE_WARNINGS_AS_ERRORS})
 endif()
 
 if(${ENABLE_LTO})
     target_enable_lto(
-        TARGET
-        ${LIBRARY_NAME}
-        ENABLE
-        ON)
+            TARGET
+            ${LIBRARY_NAME}
+            ENABLE
+            ON)
 endif()
 
 if(${ENABLE_CLANG_TIDY})
