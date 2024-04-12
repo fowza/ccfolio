@@ -23,6 +23,8 @@ target_include_directories(${EXECUTABLE_NAME} PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}/Repositories
         ${CMAKE_CURRENT_SOURCE_DIR}/Services
         ${CMAKE_CURRENT_SOURCE_DIR}/Middleware
+        ${CMAKE_CURRENT_SOURCE_DIR}/Websocket/Commands
+        ${CMAKE_CURRENT_SOURCE_DIR}/Websocket/Security
         ${CMAKE_BINARY_DIR}/configured_files/include/
 
         # ODB generated files

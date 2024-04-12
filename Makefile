@@ -3,7 +3,6 @@ ifneq (,$(wildcard ./.env))
     include .env
     export
 endif
-
 # Command shortcuts
 DOCKER_COMPOSE_CMD := sudo docker-compose
 DOCKER_CMD := sudo docker
@@ -36,10 +35,14 @@ BUILD_DIR := build
 all: prepare basic_install dependencies install_pre_commit tests
 
 # Prepare the build directory
-prepare:
+rebuild:
 	@echo "Preparing build directory..."
 	rm -rf $(BUILD_DIR)
 	mkdir $(BUILD_DIR)
+
+run:
+	cd build && cmake .. && make
+	./build/app/ccfolio-api
 
 # Install basic system packages
 basic_install:
@@ -57,8 +60,6 @@ dependencies:
 	@echo "Installing development dependencies..."
 	$(APT_CMD) update
 	$(APT_GET_CMD) install -y $(DEVELOPMENT_PACKAGES)
-
-# Install and setup Python-based tools (pre-commit, cmake-format)
 install_pre_commit:
 	@echo "Installing and setting up Python-based tools..."
 	$(PYTHON_CMD) install $(PYTHON_PACKAGES)

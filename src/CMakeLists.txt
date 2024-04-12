@@ -2,7 +2,6 @@ add_library(${LIBRARY_NAME} STATIC)
 
 file(GLOB_RECURSE SOURCES
         ${CMAKE_CURRENT_SOURCE_DIR}/Network/*.cc
-        ../app/Middleware/*.cc
         ${CMAKE_CURRENT_SOURCE_DIR}/Utility/*.cc
         ${CMAKE_CURRENT_SOURCE_DIR}/Security/*.cc
 )
@@ -12,7 +11,6 @@ target_sources(${LIBRARY_NAME} PRIVATE ${SOURCES})
 target_include_directories(${LIBRARY_NAME} PUBLIC
         # Root
         ${CMAKE_CURRENT_SOURCE_DIR}/Network
-        ../app/Middleware
         ${CMAKE_CURRENT_SOURCE_DIR}/Utility
         ${CMAKE_CURRENT_SOURCE_DIR}/Security
         ${CMAKE_BINARY_DIR}/configured_files/include/

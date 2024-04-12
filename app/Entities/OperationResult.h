@@ -11,7 +11,6 @@
 #ifndef OPERATION_RESULT_H
 #define OPERATION_RESULT_H
 
-#include <optional>
 #include <stdexcept>
 #include <string>
 #include <utility>
@@ -74,7 +73,7 @@ public:
      *
      * @return
      */
-    bool IsSuccess() const
+    [[nodiscard]] bool IsSuccess() const
     {
         return _status == OperationStatus::Success;
     }
@@ -93,7 +92,7 @@ public:
         return result;
     }
 
-    const std::string &GetErrorMessage() const
+    [[nodiscard]] const std::string &GetErrorMessage() const
     {
         if (IsSuccess())
         {

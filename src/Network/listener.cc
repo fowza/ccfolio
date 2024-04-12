@@ -7,8 +7,9 @@
 Listener::Listener(net::io_context &ioc,
                    tcp::endpoint endpoint,
                    boost::shared_ptr<SharedState> const &state,
-                   Router &router)
-    : ioc_(ioc), acceptor_(ioc), state_(state), router_(router)
+                   Router &router,
+                   std::shared_ptr<IAPIKeyVerifier> verifier)
+    : ioc_(ioc), acceptor_(ioc), state_(state), router_(router), apiKeyVerifier(std::move(verifier))
 {
     beast::error_code ec;
 
@@ -59,7 +60,7 @@ void Listener::on_accept(beast::error_code ec, tcp::socket socket)
     if (ec)
         return fail(ec, "accept");
     else
-        boost::make_shared<HttpSession>(std::move(socket), state_, router_)->run();
+        boost::make_shared<HttpSession>(std::move(socket), state_, router_, apiKeyVerifier)->run();
 
     acceptor_.async_accept(net::make_strand(ioc_), beast::bind_front_handler(&Listener::on_accept, shared_from_this()));
 }

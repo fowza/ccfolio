@@ -21,6 +21,11 @@ template <typename T>
 class ResponseDto
 {
 public:
+    ResponseDto(bool isSuccess, std::optional<T> result, std::optional<std::string> errorMessage)
+        : isSuccess(isSuccess), result(std::move(result)), errorMessage(std::move(errorMessage))
+    {
+    }
+
     bool isSuccess;
     std::optional<T> result;
     std::optional<std::string> errorMessage;
@@ -40,19 +45,19 @@ public:
      *
      * @return json
      */
-    json toJson() const
+    [[nodiscard]] json toJson() const
     {
-        json j;
-        j["isSuccess"] = isSuccess;
+        json json_;
+        json_["isSuccess"] = isSuccess;
         if (result.has_value())
         {
-            j["result"] = result.value().toJson();
+            json_["result"] = result.value().toJson();
         }
         if (errorMessage.has_value())
         {
-            j["errorMessage"] = errorMessage.value();
+            json_["errorMessage"] = errorMessage.value();
         }
-        return j;
+        return json_;
     }
 };
 

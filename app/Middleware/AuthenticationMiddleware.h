@@ -17,7 +17,7 @@ public:
      * @param func The function to call if the token is valid
      * @return A handler that calls the given function if the token is valid
      */
-    static auto WithAuthentication(Handler func) -> Handler
+    static auto WithAuthentication(const Handler &func) -> Handler
     {
         return [func](const HttpRequest &req, HttpResponse &res) {
             if (!JWTHelper::ValidateToken(req, res))

@@ -1,10 +1,13 @@
 #include "WebSocketSession.h"
+#include "CommandRegistry.h"
 #include "LogService.h"
 #include "fmt/format.h"
 #include <iostream>
 
-WebSocketSession::WebSocketSession(tcp::socket &&socket, boost::shared_ptr<SharedState> const &state)
-    : ws_(std::move(socket)), state_(state)
+WebSocketSession::WebSocketSession(tcp::socket &&socket,
+                                   boost::shared_ptr<SharedState> const &state,
+                                   std::shared_ptr<IAPIKeyVerifier> verifier)
+    : ws_(std::move(socket)), state_(state), apiKeyVerifier(std::move(verifier))
 {
 }
 
@@ -27,7 +30,6 @@ void WebSocketSession::on_accept(beast::error_code ec)
         return fail(ec, "accept");
 
     state_->join(this);
-
     ws_.async_read(buffer_, beast::bind_front_handler(&WebSocketSession::on_read, shared_from_this()));
 }
 
@@ -37,8 +39,20 @@ void WebSocketSession::on_read(beast::error_code ec, std::size_t)
         return fail(ec, "read");
 
     auto message = beast::buffers_to_string(buffer_.data());
+    auto json = nlohmann::json::parse(message);
+    auto commandName = json["command"].get<std::string>();
+    auto args = json["args"];
 
-    // TODO: Parse the message for commands
+    auto command = CommandRegistry::getInstance().getCommand(commandName);
+    if (command)
+    {
+        command->execute(args);
+    }
+    else
+    {
+        fail(beast::error_code{}, "Invalid command!");
+        return;
+    }
 
     buffer_.consume(buffer_.size());
 

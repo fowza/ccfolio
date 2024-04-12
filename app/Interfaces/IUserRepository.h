@@ -12,17 +12,14 @@
 #ifndef IUSER_REPOSITORY_H
 #define IUSER_REPOSITORY_H
 
-#include "IRepository.h"
 #include "OperationResult.h"
-#include "User-odb.hxx"
+#include "User.h"
 #include <optional>
-#include <string>
 
 class IUserRepository
 {
 public:
     virtual ~IUserRepository() = default;
-
     virtual OperationResult<std::optional<User>> getUserByUsername(const std::string &username) = 0;
     virtual OperationResult<User> createUser(User user) = 0;
 };

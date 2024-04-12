@@ -12,6 +12,8 @@
 #ifndef USER_SERVICE_H
 #define USER_SERVICE_H
 
+#include "APIKeyHelper.h"
+#include "CreateUserDto.h"
 #include "IUserRepository.h"
 #include "LogService.h"
 #include "OperationResult.h"
@@ -19,7 +21,6 @@
 #include "User.h"
 #include "UserDto.h"
 #include "Utility.h"
-#include "config.hpp"
 #include <JWTHelper.h>
 #include <PasswordHelper.h>
 #include <argon2.h>
@@ -27,10 +28,6 @@
 #include <jwt-cpp/jwt.h>
 #include <memory>
 #include <nlohmann/json.hpp>
-#include <random>
-#include <sstream>
-#include <vector>
-
 using json = nlohmann::json;
 
 class UserService
@@ -46,7 +43,7 @@ public:
      * @param request JSON payload with user data
      * @return ResponseDto<UserDto>
      */
-    ResponseDto<UserDto> CreateUser(const std::string &request)
+    ResponseDto<CreateUserDto> CreateUser(const std::string &request)
     {
         try
         {
@@ -57,30 +54,33 @@ public:
             auto [hashedPassword, salt] = PasswordHelper::HashPasswordWithArgon2(password);
             std::string saltStr = Utility::toHexString(salt);
 
-            User user{username, hashedPassword, saltStr};
+            auto userApiKey = APIKeyHelper::createAPIKey();
+            auto userApiKeyHash = APIKeyHelper::hashAPIKey(userApiKey, salt);
+
+            User user{username, hashedPassword, saltStr, userApiKeyHash};
             auto creationResult = userRepository->createUser(user);
 
             if (creationResult.IsSuccess())
             {
-                UserDto userDto{username};
+                CreateUserDto userDto;
+                userDto.username = username;
                 userDto.token = JWTHelper::CreateJWTToken(userDto.username);
-                return ResponseDto<UserDto>::Success(userDto);
+                userDto.apikey = userApiKey;
+                return ResponseDto<CreateUserDto>::Success(userDto);
             }
-            else
-            {
-                LOG(LogService::LogLevel::INFO, creationResult.GetErrorMessage());
-                return ResponseDto<UserDto>::Failure(creationResult.GetErrorMessage());
-            }
+
+            LOG(LogService::LogLevel::INFO, creationResult.GetErrorMessage());
+            return ResponseDto<CreateUserDto>::Failure(creationResult.GetErrorMessage());
         }
         catch (const json::exception &e)
         {
             LOG(LogService::LogLevel::ERROR, e.what());
-            return ResponseDto<UserDto>::Failure("Invalid JSON format");
+            return ResponseDto<CreateUserDto>::Failure("Invalid JSON format");
         }
         catch (const std::exception &e)
         {
             LOG(LogService::LogLevel::ERROR, e.what());
-            return ResponseDto<UserDto>::Failure("Something happened, please try again later");
+            return ResponseDto<CreateUserDto>::Failure("Something happened, please try again later");
         }
     }
 

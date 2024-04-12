@@ -1,3 +1,6 @@
+#include "APIKeyVerifier.h"
+#include "IAPIKeyVerifier.h"
+#include "RegisterCommand.h"
 #include <Listener.h>
 #include <OdbRepository.h>
 #include <SharedState.h>
@@ -18,15 +21,19 @@
 int main()
 {
     // Create the database
-    std::shared_ptr<odb::pgsql::database> db(new odb::pgsql::database(std::string(pg_user),
-                                                                      std::string(pg_password),
-                                                                      std::string(pg_database),
-                                                                      std::string(pg_host),
-                                                                      5432));
+    std::shared_ptr<odb::pgsql::database> postgres_db(new odb::pgsql::database(std::string(pg_user),
+                                                                               std::string(pg_password),
+                                                                               std::string(pg_database),
+                                                                               std::string(pg_host),
+                                                                               5432));
 
     auto serverAddress = net::ip::make_address(std::string(server_address));
     auto serverPort = static_cast<unsigned short>(std::atoi(std::string(server_port).c_str()));
     auto workerThreads = std::max<int>(1, std::atoi("4"));
+
+    // Register websocket commands
+    CommandRegistrar registrar;
+    registerWebsocketCommands(registrar);
 
     net::io_context ioContext;
 
@@ -34,31 +41,39 @@ int main()
     Router httpRouter;
 
     // Create repositories and services
-    auto userRepository = std::make_shared<UserRepository>(std::make_shared<OdbRepository<User>>(db));
+    auto userRepository = std::make_shared<UserRepository>(std::make_shared<OdbRepository<User>>(postgres_db));
     auto userService = std::make_shared<UserService>(userRepository);
 
     // Create the controllers
     UserController userController(userService, &httpRouter);
     TestController testController(&httpRouter);
 
+    // API Key verifier
+    std::shared_ptr<IAPIKeyVerifier> verifier = std::make_shared<APIKeyVerifier>();
+
     boost::make_shared<Listener>(ioContext,
                                  tcp::endpoint{serverAddress, serverPort},
                                  boost::make_shared<SharedState>(std::string(doc_root)),
-                                 httpRouter)
+                                 httpRouter,
+                                 verifier)
         ->run();
-    std::cout << "Server listening on " << serverAddress << ":" << serverPort << std::endl;
+    std::cout << "Server listening on " << serverAddress << ":" << serverPort << "\n";
 
     net::signal_set signals(ioContext, SIGINT, SIGTERM);
     signals.async_wait([&ioContext](boost::system::error_code const &, int) { ioContext.stop(); });
 
-    std::vector<std::thread> v;
-    v.reserve(workerThreads - 1);
+    std::vector<std::thread> _threads;
+    _threads.reserve(static_cast<size_t>(workerThreads - 1));
     for (auto i = workerThreads - 1; i > 0; --i)
-        v.emplace_back([&ioContext] { ioContext.run(); });
+    {
+        _threads.emplace_back([&ioContext] { ioContext.run(); });
+    }
     ioContext.run();
 
-    for (auto &t : v)
-        t.join();
+    for (auto &thread : _threads)
+    {
+        thread.join();
+    }
 
     return EXIT_SUCCESS;
 }

@@ -15,15 +15,10 @@
 #include "IUserRepository.h"
 #include "OdbRepository.h"
 #include "OperationResult.h"
-#include "odb/transaction.hxx"
+#include "User-odb.hxx"
 #include <argon2.h>
-#include <cstring>
 #include <fmt/format.h>
-#include <iostream>
 #include <optional>
-#include <random>
-#include <sstream>
-#include <vector>
 
 class UserRepository : public IUserRepository
 {
@@ -79,14 +74,14 @@ public:
     {
         try
         {
-            odb::core::transaction t(dbConnector->database()->begin());
+            odb::core::transaction transaction(dbConnector->database()->begin());
             typedef odb::query<User> Query;
             typedef odb::result<User> Result;
-            Result r = dbConnector->database()->query<User>(Query::username == username);
+            Result result = dbConnector->database()->query<User>(Query::username == username);
 
-            for (auto &user : r)
+            for (auto &user : result)
             {
-                t.commit();
+                transaction.commit();
                 return OperationResult<std::optional<User>>::SuccessResult(user);
             }
 

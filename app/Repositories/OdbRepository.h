@@ -17,7 +17,6 @@
 #include "IRepository.h"
 #include "LogService.h"
 #include "OperationResult.h"
-#include "User-odb.hxx"
 #include <memory>
 #include <odb/database.hxx>
 #include <odb/exception.hxx>
@@ -28,10 +27,10 @@
 template <typename T, typename IdType = int>
 class OdbRepository : public IRepository<T, IdType>
 {
-    std::shared_ptr<odb::pgsql::database> db;
+    std::shared_ptr<odb::pgsql::database> postgres_db;
 
 public:
-    explicit OdbRepository(std::shared_ptr<odb::pgsql::database> db) : db(std::move(db))
+    explicit OdbRepository(std::shared_ptr<odb::pgsql::database> postgres_db) : postgres_db(std::move(postgres_db))
     {
     }
 
@@ -45,9 +44,9 @@ public:
     {
         try
         {
-            odb::transaction t(db->begin());
-            db->persist(entity);
-            t.commit();
+            odb::transaction transaction(postgres_db->begin());
+            postgres_db->persist(entity);
+            transaction.commit();
             return OperationResult<bool>::SuccessResult(true);
         }
         catch (const odb::connection_lost &e)
@@ -68,13 +67,13 @@ public:
      * @param id Id of the entity
      * @return OperationResult<T>
      */
-    OperationResult<T> Read(IdType id) const override
+    OperationResult<T> Read(IdType entityId) const override
     {
         try
         {
-            odb::transaction t(db->begin());
-            std::unique_ptr<T> entity(db->load<T>(id));
-            t.commit();
+            odb::transaction transaction(postgres_db->begin());
+            std::unique_ptr<T> entity(postgres_db->load<T>(entityId));
+            transaction.commit();
             return OperationResult<T>::SuccessResult(*entity);
         }
         catch (const odb::connection_lost &e)
@@ -99,9 +98,9 @@ public:
     {
         try
         {
-            odb::transaction t(db->begin());
-            db->update(entity);
-            t.commit();
+            odb::transaction transaction(postgres_db->begin());
+            postgres_db->update(entity);
+            transaction.commit();
             return OperationResult<bool>::SuccessResult(true);
         }
         catch (const odb::connection_lost &e)
@@ -122,13 +121,13 @@ public:
      * @param id Id of the entity
      * @return OperationResult<bool>
      */
-    OperationResult<bool> Delete(IdType id) override
+    OperationResult<bool> Delete(IdType entityId) override
     {
         try
         {
-            odb::transaction t(db->begin());
-            db->erase<T>(id);
-            t.commit();
+            odb::transaction transaction(postgres_db->begin());
+            postgres_db->erase<T>(entityId);
+            transaction.commit();
             return OperationResult<bool>::SuccessResult(true);
         }
         catch (const odb::connection_lost &e)
@@ -152,14 +151,14 @@ public:
     {
         try
         {
-            odb::transaction t(db->begin());
-            odb::result<T> result = db->query<T>();
+            odb::transaction transaction(postgres_db->begin());
+            odb::result<T> result = postgres_db->query<T>();
             std::vector<T> entities;
             for (const auto &entity : result)
             {
                 entities.push_back(entity);
             }
-            t.commit();
+            transaction.commit();
             return OperationResult<std::vector<T>>::SuccessResult(entities);
         }
         catch (const odb::connection_lost &e)
@@ -174,9 +173,9 @@ public:
         }
     }
 
-    std::shared_ptr<odb::pgsql::database> database() const
+    [[nodiscard]] std::shared_ptr<odb::pgsql::database> database() const
     {
-        return db;
+        return postgres_db;
     }
 };
 

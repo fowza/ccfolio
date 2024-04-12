@@ -21,12 +21,10 @@ template <typename T, typename IdType = int>
 class IRepository
 {
 public:
-    virtual ~IRepository() = default;
-
     virtual OperationResult<bool> Create(T entity) = 0;
-    virtual OperationResult<T> Read(IdType id) const = 0;
+    virtual OperationResult<T> Read(IdType entityId) const = 0;
     virtual OperationResult<bool> Update(const T &entity) = 0;
-    virtual OperationResult<bool> Delete(IdType id) = 0;
+    virtual OperationResult<bool> Delete(IdType entityId) = 0;
     virtual OperationResult<std::vector<T>> ReadAll() const = 0;
 };
 

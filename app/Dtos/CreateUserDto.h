@@ -8,18 +8,19 @@
  * @copyright Copyright (c) 2024
  *
  */
-#ifndef USER_DTO_H
-#define USER_DTO_H
+#ifndef CREATEUSER_DTO_H
+#define CREATEUSER_DTO_H
 
 #include <nlohmann/json.hpp>
 #include <string>
 
 using json = nlohmann::json;
 
-struct UserDto
+struct CreateUserDto
 {
     std::string username;
     std::string token;
+    std::string apikey;
 
     /**
      * @brief Convert the user dto to a json object
@@ -31,8 +32,9 @@ struct UserDto
         json j;
         j["username"] = username;
         j["token"] = token;
+        j["apikey"] = apikey;
         return j;
     }
 };
 
-#endif // USER_DTO_H
+#endif // CREATEUSER_DTO_H

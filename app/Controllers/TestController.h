@@ -16,7 +16,6 @@
 #include "LogService.h"
 #include <Router.h>
 #include <fmt/format.h>
-#include <functional>
 #include <jwt-cpp/jwt.h>
 #include <nlohmann/json.hpp>
 
@@ -25,34 +24,34 @@ using json = nlohmann::json;
 class TestController
 {
 public:
-    TestController(Router *router)
+    explicit TestController(Router *router)
     {
         router->addRoute("POST",
                          "/test",
-                         AuthenticationMiddleware::WithAuthentication(
-                             [this](const HttpRequest &req, HttpResponse &res) { this->handleHelloWorld(req, res); }));
+                         AuthenticationMiddleware::WithAuthentication([](const HttpRequest &req, HttpResponse &res) {
+                             TestController::handleHelloWorld(req, res);
+                         }));
     }
 
 private:
     /**
      * @brief Handle the request for creating a new user
-     *
      * @param request The request
      * @param response The response
      */
-    void handleHelloWorld(const HttpRequest &req, HttpResponse &res)
+    static void handleHelloWorld(const HttpRequest &req, HttpResponse &res)
     {
         try
         {
             auto jsonPayload = json::parse(req.body());
             const std::string username = jsonPayload["username"];
 
-            json j;
-            j["message"] = fmt::format("Hello {}", username);
+            json json_;
+            json_["message"] = fmt::format("Hello {}", username);
 
             res.result(http::status::ok);
             res.set(http::field::content_type, "application/json");
-            res.body() = j.dump();
+            res.body() = json_.dump();
             res.prepare_payload();
         }
         catch (const std::exception &e)

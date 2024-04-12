@@ -6,6 +6,7 @@
 #define CCFOLIO_LISTENER_H
 
 #include "Beast.h"
+#include "IAPIKeyVerifier.h"
 #include "Net.h"
 #include "Router.h"
 #include <boost/smart_ptr.hpp>
@@ -20,12 +21,17 @@ class Listener : public boost::enable_shared_from_this<Listener>
     tcp::acceptor acceptor_;
     boost::shared_ptr<SharedState> state_;
     Router &router_;
+    std::shared_ptr<IAPIKeyVerifier> apiKeyVerifier;
 
     void fail(beast::error_code ec, char const *what);
     void on_accept(beast::error_code ec, tcp::socket socket);
 
 public:
-    Listener(net::io_context &ioc, tcp::endpoint endpoint, boost::shared_ptr<SharedState> const &state, Router &router);
+    Listener(net::io_context &ioc,
+             tcp::endpoint endpoint,
+             boost::shared_ptr<SharedState> const &state,
+             Router &router,
+             std::shared_ptr<IAPIKeyVerifier> verifier);
 
     void run();
 };

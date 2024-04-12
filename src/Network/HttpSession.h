@@ -9,6 +9,7 @@
 #include "Net.h"
 #include "Router.h"
 #include "SharedState.h"
+#include <IAPIKeyVerifier.h>
 #include <boost/optional.hpp>
 #include <boost/smart_ptr.hpp>
 #include <cstdlib>
@@ -20,6 +21,7 @@ class HttpSession : public boost::enable_shared_from_this<HttpSession>
     beast::flat_buffer buffer_;
     boost::shared_ptr<SharedState> state_;
     Router &router_;
+    std::shared_ptr<IAPIKeyVerifier> apiKeyVerifier;
 
     boost::optional<http::request_parser<http::string_body>> parser_;
 
@@ -31,7 +33,10 @@ class HttpSession : public boost::enable_shared_from_this<HttpSession>
     void on_write(beast::error_code ec, std::size_t, bool close);
 
 public:
-    HttpSession(tcp::socket &&socket, boost::shared_ptr<SharedState> const &state, Router &router);
+    HttpSession(tcp::socket &&socket,
+                boost::shared_ptr<SharedState> const &state,
+                Router &router,
+                std::shared_ptr<IAPIKeyVerifier> verifier);
 
     void run();
 };

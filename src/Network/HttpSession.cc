@@ -47,8 +47,11 @@ struct HttpSession::send_lambda
     }
 };
 
-HttpSession::HttpSession(tcp::socket &&socket, boost::shared_ptr<SharedState> const &state, Router &router)
-    : stream_(std::move(socket)), state_(state), router_(router)
+HttpSession::HttpSession(tcp::socket &&socket,
+                         boost::shared_ptr<SharedState> const &state,
+                         Router &router,
+                         std::shared_ptr<IAPIKeyVerifier> verifier)
+    : stream_(std::move(socket)), state_(state), router_(router), apiKeyVerifier(std::move(verifier))
 {
 }
 
@@ -90,7 +93,7 @@ void HttpSession::on_read(beast::error_code ec, std::size_t)
 
     if (websocket::is_upgrade(parser_->get()))
     {
-        boost::make_shared<WebSocketSession>(stream_.release_socket(), state_)->run(parser_->release());
+        boost::make_shared<WebSocketSession>(stream_.release_socket(), state_, apiKeyVerifier)->run(parser_->release());
         return;
     }
 

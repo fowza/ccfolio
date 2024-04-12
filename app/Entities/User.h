@@ -20,25 +20,30 @@ class User
 {
 public:
     User() = default;
-    User(std::string username_, std::string passwordHash_, std::string salt_)
-        : username(std::move(username_)), passwordHash(std::move(passwordHash_)), salt(std::move(salt_))
+    User(std::string username_, std::string passwordHash_, std::string salt_, std::string apiKeyHash_)
+        : username(std::move(username_)), passwordHash(std::move(passwordHash_)), apiKeyHash(std::move(apiKeyHash_)),
+          salt(std::move(salt_))
     {
     }
 
-    int getId() const
+    [[nodiscard]] int getId() const
     {
         return id;
     }
-    std::string getUsername() const
+    [[nodiscard]] std::string getUsername() const
     {
         return username;
     }
-    std::string getPasswordHash() const
+    [[nodiscard]] std::string getPasswordHash() const
     {
         return passwordHash;
     }
+    [[nodiscard]] std::string getApiKeyHash() const
+    {
+        return apiKeyHash;
+    }
 
-    std::string getSalt() const
+    [[nodiscard]] std::string getSalt() const
     {
         return salt;
     }
@@ -51,6 +56,7 @@ private:
 
     std::string username;
     std::string passwordHash;
+    std::string apiKeyHash;
 
 #pragma db index
     std::string salt;
