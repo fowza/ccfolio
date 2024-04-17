@@ -1,3 +1,14 @@
+set(SECRET_KEY $ENV{SECRET_KEY})
+set(PG_USER $ENV{PG_USER})
+set(PG_PASSWORD $ENV{PG_PASSWORD})
+set(PG_DATABASE $ENV{PG_DATABASE})
+set(PG_HOST $ENV{PG_HOST})
+set(API_DOC_ROOT $ENV{API_DOC_ROOT})
+set(API_SERVER_ADDRESS $ENV{API_SERVER_ADDRESS})
+set(API_SERVER_PORT $ENV{API_SERVER_PORT})
+
 configure_file(
-    "config.hpp.in" "${CMAKE_BINARY_DIR}/configured_files/include/config.hpp"
-    ESCAPE_QUOTES)
+        "config.hpp.in" "${CMAKE_BINARY_DIR}/configured_files/include/config.hpp"
+        @ONLY
+        NEWLINE_STYLE UNIX
+)

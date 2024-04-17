@@ -1,6 +1,38 @@
-set(APP_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/main.cc")
+file(GLOB_RECURSE APP_SOURCES
+        "${CMAKE_CURRENT_SOURCE_DIR}/main.cc"
+        ${CMAKE_CURRENT_SOURCE_DIR}/Controllers/*.cc
+        ${CMAKE_CURRENT_SOURCE_DIR}/Dtos/*.cc
+        ${CMAKE_CURRENT_SOURCE_DIR}/Entities/*.cc
+        ${CMAKE_CURRENT_SOURCE_DIR}/Interfaces/*.cc
+        ${CMAKE_CURRENT_SOURCE_DIR}/Repositories/*.cc
+        ${CMAKE_CURRENT_SOURCE_DIR}/Services/*.cc
+        ${CMAKE_CURRENT_SOURCE_DIR}/Middleware/*.cc
+
+        # ODB generated files
+        ${CMAKE_CURRENT_SOURCE_DIR}/Entities/odb/*.cxx
+)
 
 add_executable(${EXECUTABLE_NAME} ${APP_SOURCES})
+
+target_include_directories(${EXECUTABLE_NAME} PUBLIC
+        # Root
+        ${CMAKE_CURRENT_SOURCE_DIR}/Controllers
+        ${CMAKE_CURRENT_SOURCE_DIR}/Dtos
+        ${CMAKE_CURRENT_SOURCE_DIR}/Entities
+        ${CMAKE_CURRENT_SOURCE_DIR}/Interfaces
+        ${CMAKE_CURRENT_SOURCE_DIR}/Repositories
+        ${CMAKE_CURRENT_SOURCE_DIR}/Services
+        ${CMAKE_CURRENT_SOURCE_DIR}/Middleware
+        ${CMAKE_BINARY_DIR}/configured_files/include/
+
+        # ODB generated files
+        ${CMAKE_CURRENT_SOURCE_DIR}/Entities/odb
+
+        # External
+        ${Boost_INCLUDE_DIRS}
+        ${ODB_INCLUDE_DIRS}
+        ${ARGON2_INCLUDE_DIRS}
+)
 
 target_link_libraries(
     ${EXECUTABLE_NAME}
@@ -9,7 +41,10 @@ target_link_libraries(
             fmt::fmt
             spdlog::spdlog
             cxxopts::cxxopts
-            PkgConfig::Pistache )
+        ${Boost_LIBRARIES}
+        ${ODB_LIBRARIES}
+        ${ARGON2_LIBRARIES}
+        jwt-cpp)
 
 if(${ENABLE_WARNINGS})
     target_set_warnings(

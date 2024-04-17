@@ -1,60 +1,56 @@
-set(LIBRARY_SOURCES "")
+add_library(${LIBRARY_NAME} STATIC)
 
-set(LIBRARY_HEADERS
-    #Controllers
-    "${CMAKE_CURRENT_SOURCE_DIR}/Controllers/UserController.h"
-
-    #Entities
-    "${CMAKE_CURRENT_SOURCE_DIR}/Entities/User.h"
-
-    #Interfaces
-    "${CMAKE_CURRENT_SOURCE_DIR}/Interfaces/IUserRepository.h"
-
-    #Repositories
-    "${CMAKE_CURRENT_SOURCE_DIR}/Repositories/UserRepository.h"
-
-    #UseCases
-    "${CMAKE_CURRENT_SOURCE_DIR}/UseCases/CreateUserUseCase.h"
-    "${CMAKE_CURRENT_SOURCE_DIR}/UseCases/GetUserUseCase.h"
+file(GLOB_RECURSE SOURCES
+        ${CMAKE_CURRENT_SOURCE_DIR}/Network/*.cc
+        ../app/Middleware/*.cc
+        ${CMAKE_CURRENT_SOURCE_DIR}/Utility/*.cc
+        ${CMAKE_CURRENT_SOURCE_DIR}/Security/*.cc
 )
 
-set(LIBRARY_INCLUDES
-    "${CMAKE_CURRENT_SOURCE_DIR}"
-    "${CMAKE_CURRENT_SOURCE_DIR}/Controllers"
-    "${CMAKE_CURRENT_SOURCE_DIR}/Entities"
-    "${CMAKE_CURRENT_SOURCE_DIR}/Interfaces"
-    "${CMAKE_CURRENT_SOURCE_DIR}/Repositories"
-    "${CMAKE_CURRENT_SOURCE_DIR}/UseCases"
-    "${CMAKE_BINARY_DIR}/configured_files/include"
+target_sources(${LIBRARY_NAME} PRIVATE ${SOURCES})
+
+target_include_directories(${LIBRARY_NAME} PUBLIC
+        # Root
+        ${CMAKE_CURRENT_SOURCE_DIR}/Network
+        ../app/Middleware
+        ${CMAKE_CURRENT_SOURCE_DIR}/Utility
+        ${CMAKE_CURRENT_SOURCE_DIR}/Security
+        ${CMAKE_BINARY_DIR}/configured_files/include/
+
+        # External
+        ${Boost_INCLUDE_DIRS}
+        ${ODB_INCLUDE_DIRS}
+        ${ARGON2_INCLUDE_DIRS}
 )
 
-add_library(${LIBRARY_NAME} STATIC ${LIBRARY_SOURCES} ${LIBRARY_HEADERS})
-target_include_directories(${LIBRARY_NAME} PUBLIC ${LIBRARY_INCLUDES})
-target_link_libraries(
-    ${LIBRARY_NAME}
-    PRIVATE nlohmann_json::nlohmann_json
-            fmt::fmt
-            spdlog::spdlog
-            cxxopts::cxxopts
-            PkgConfig::Pistache
-            )
+target_link_libraries(${LIBRARY_NAME}
+        PUBLIC
+        nlohmann_json::nlohmann_json
+        fmt::fmt
+        spdlog::spdlog
+        cxxopts::cxxopts
+        ${Boost_LIBRARIES}
+        ${ODB_LIBRARIES}
+        ${ARGON2_LIBRARIES}
+        jwt-cpp
+)
 
 if(${ENABLE_WARNINGS})
     target_set_warnings(
-        TARGET
-        ${LIBRARY_NAME}
-        ENABLE
-        ${ENABLE_WARNINGS}
-        AS_ERRORS
-        ${ENABLE_WARNINGS_AS_ERRORS})
+            TARGET
+            ${LIBRARY_NAME}
+            ENABLE
+            ${ENABLE_WARNINGS}
+            AS_ERRORS
+            ${ENABLE_WARNINGS_AS_ERRORS})
 endif()
 
 if(${ENABLE_LTO})
     target_enable_lto(
-        TARGET
-        ${LIBRARY_NAME}
-        ENABLE
-        ON)
+            TARGET
+            ${LIBRARY_NAME}
+            ENABLE
+            ON)
 endif()
 
 if(${ENABLE_CLANG_TIDY})
