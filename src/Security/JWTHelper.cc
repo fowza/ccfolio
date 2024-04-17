@@ -26,15 +26,13 @@ std::string JWTHelper::CreateJWTToken(const std::string &username)
         auto now = std::chrono::system_clock::now();
         auto expTime = now + std::chrono::minutes(3);
 
-        auto token = jwt::create()
-                         .set_type("JWS")
-                         .set_issuer(issuer)
-                         .set_issued_at(now)
-                         .set_expires_at(expTime)
-                         .set_payload_claim("username", jwt::claim(username))
-                         .sign(jwt::algorithm::hs256{secretKey});
-
-        return std::string(token);
+        return jwt::create()
+            .set_type("JWS")
+            .set_issuer(issuer)
+            .set_issued_at(now)
+            .set_expires_at(expTime)
+            .set_payload_claim("username", jwt::claim(username))
+            .sign(jwt::algorithm::hs256{secretKey});
     }
     catch (const std::exception &e)
     {

@@ -13,7 +13,6 @@
 #define USER_SERVICE_H
 
 #include "APIKeyHelper.h"
-#include "CreateUserDto.h"
 #include "IUserRepository.h"
 #include "LogService.h"
 #include "OperationResult.h"
@@ -43,7 +42,7 @@ public:
      * @param request JSON payload with user data
      * @return ResponseDto<UserDto>
      */
-    ResponseDto<CreateUserDto> CreateUser(const std::string &request)
+    ResponseDto<UserDto> CreateUser(const std::string &request)
     {
         try
         {
@@ -54,33 +53,29 @@ public:
             auto [hashedPassword, salt] = PasswordHelper::HashPasswordWithArgon2(password);
             std::string saltStr = Utility::toHexString(salt);
 
-            auto userApiKey = APIKeyHelper::createAPIKey();
-            auto userApiKeyHash = APIKeyHelper::hashAPIKey(userApiKey, salt);
-
-            User user{username, hashedPassword, saltStr, userApiKeyHash};
+            User user{username, hashedPassword, saltStr};
             auto creationResult = userRepository->createUser(user);
 
             if (creationResult.IsSuccess())
             {
-                CreateUserDto userDto;
+                UserDto userDto;
                 userDto.username = username;
                 userDto.token = JWTHelper::CreateJWTToken(userDto.username);
-                userDto.apikey = userApiKey;
-                return ResponseDto<CreateUserDto>::Success(userDto);
+                return ResponseDto<UserDto>::Success(userDto);
             }
 
             LOG(LogService::LogLevel::INFO, creationResult.GetErrorMessage());
-            return ResponseDto<CreateUserDto>::Failure(creationResult.GetErrorMessage());
+            return ResponseDto<UserDto>::Failure(creationResult.GetErrorMessage());
         }
         catch (const json::exception &e)
         {
             LOG(LogService::LogLevel::ERROR, e.what());
-            return ResponseDto<CreateUserDto>::Failure("Invalid JSON format");
+            return ResponseDto<UserDto>::Failure("Invalid JSON format");
         }
         catch (const std::exception &e)
         {
             LOG(LogService::LogLevel::ERROR, e.what());
-            return ResponseDto<CreateUserDto>::Failure("Something happened, please try again later");
+            return ResponseDto<UserDto>::Failure("Something happened, please try again later");
         }
     }
 
@@ -106,16 +101,16 @@ public:
             }
 
             const auto &user = userResult.GetResult().value();
-            bool isLoginSuccess = PasswordHelper::VerifyUserPassword(user.getPasswordHash(), user.getSalt(), password);
+            bool isLoginSuccess = PasswordHelper::VerifyUserPassword(user.passwordHash(), user.salt(), password);
 
             if (!isLoginSuccess)
             {
                 LOG(LogService::LogLevel::INFO,
-                    fmt::format("Wrong username or password for user with username: {}", user.getUsername()));
+                    fmt::format("Wrong username or password for user with username: {}", user.username()));
                 return ResponseDto<UserDto>::Failure("Wrong username or password!");
             }
 
-            UserDto userDto{userResult.GetResult()->getUsername()};
+            UserDto userDto{userResult.GetResult()->username()};
             userDto.token = JWTHelper::CreateJWTToken(userDto.username);
             return ResponseDto<UserDto>::Success(userDto);
         }

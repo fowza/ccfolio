@@ -14,52 +14,42 @@
 
 #include <odb/core.hxx>
 #include <string>
+#include <utility>
 
-#pragma db object
+#pragma db object pointer(std::shared_ptr)
 class User
 {
 public:
-    User() = default;
-    User(std::string username_, std::string passwordHash_, std::string salt_, std::string apiKeyHash_)
-        : username(std::move(username_)), passwordHash(std::move(passwordHash_)), apiKeyHash(std::move(apiKeyHash_)),
-          salt(std::move(salt_))
+    User(std::string username, std::string passwordHash, std::string salt)
+        : username_(std::move(username)), passwordHash_(std::move(passwordHash)), salt_(std::move(salt))
     {
     }
 
-    [[nodiscard]] int getId() const
+    [[nodiscard]] const std::string &username() const
     {
-        return id;
+        return username_;
     }
-    [[nodiscard]] std::string getUsername() const
+    [[nodiscard]] const std::string &passwordHash() const
     {
-        return username;
+        return passwordHash_;
     }
-    [[nodiscard]] std::string getPasswordHash() const
+    [[nodiscard]] const std::string &salt() const
     {
-        return passwordHash;
-    }
-    [[nodiscard]] std::string getApiKeyHash() const
-    {
-        return apiKeyHash;
-    }
-
-    [[nodiscard]] std::string getSalt() const
-    {
-        return salt;
+        return salt_;
     }
 
 private:
     friend class odb::access;
+    User()
+    {
+    }
 
 #pragma db id auto
-    int id{};
+    unsigned long id_;
 
-    std::string username;
-    std::string passwordHash;
-    std::string apiKeyHash;
-
-#pragma db index
-    std::string salt;
+    std::string username_;
+    std::string passwordHash_;
+    std::string salt_;
 };
 
 #endif // USER_H

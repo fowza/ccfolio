@@ -2,8 +2,8 @@
 // compiler for C++.
 //
 
-#ifndef USER_ODB_HXX
-#define USER_ODB_HXX
+#ifndef API_KEY_ODB_HXX
+#define API_KEY_ODB_HXX
 
 #include <odb/version.hxx>
 
@@ -13,7 +13,7 @@
 
 #include <odb/pre.hxx>
 
-#include "User.h"
+#include "ApiKey.h"
 
 #include <cstddef>
 #include <memory>
@@ -34,20 +34,20 @@
 
 namespace odb
 {
-// User
+// ApiKey
 //
 template <>
-struct class_traits<::User>
+struct class_traits<::ApiKey>
 {
     static const class_kind kind = class_object;
 };
 
 template <>
-class access::object_traits<::User>
+class access::object_traits<::ApiKey>
 {
 public:
-    typedef ::User object_type;
-    typedef ::std::shared_ptr<::User> pointer_type;
+    typedef ::ApiKey object_type;
+    typedef ::std::shared_ptr<::ApiKey> pointer_type;
     typedef odb::pointer_traits<pointer_type> pointer_traits;
 
     static const bool polymorphic = false;
@@ -80,10 +80,10 @@ public:
 
 namespace odb
 {
-// User
+// ApiKey
 //
 template <typename A>
-struct query_columns<::User, id_pgsql, A>
+struct query_columns<::ApiKey, id_pgsql, A>
 {
     // id
     //
@@ -92,57 +92,114 @@ struct query_columns<::User, id_pgsql, A>
 
     static const id_type_ id;
 
-    // username
+    // hash
     //
     typedef pgsql::query_column<pgsql::value_traits<::std::string, pgsql::id_string>::query_type, pgsql::id_string>
-        username_type_;
+        hash_type_;
 
-    static const username_type_ username;
+    static const hash_type_ hash;
 
-    // passwordHash
+    // description
     //
     typedef pgsql::query_column<pgsql::value_traits<::std::string, pgsql::id_string>::query_type, pgsql::id_string>
-        passwordHash_type_;
+        description_type_;
 
-    static const passwordHash_type_ passwordHash;
+    static const description_type_ description;
 
-    // salt
+    // status
     //
     typedef pgsql::query_column<pgsql::value_traits<::std::string, pgsql::id_string>::query_type, pgsql::id_string>
-        salt_type_;
+        status_type_;
 
-    static const salt_type_ salt;
+    static const status_type_ status;
+
+    // user_id
+    //
+    typedef pgsql::query_column<pgsql::value_traits<long unsigned int, pgsql::id_bigint>::query_type, pgsql::id_bigint>
+        user_id_type_;
+
+    static const user_id_type_ user_id;
+
+    // expires_at
+    //
+    typedef pgsql::query_column<
+        pgsql::value_traits<::std::chrono::system_clock::time_point, pgsql::id_timestamp>::query_type,
+        pgsql::id_timestamp>
+        expires_at_type_;
+
+    static const expires_at_type_ expires_at;
+
+    // created_at
+    //
+    typedef pgsql::query_column<
+        pgsql::value_traits<::std::chrono::system_clock::time_point, pgsql::id_timestamp>::query_type,
+        pgsql::id_timestamp>
+        created_at_type_;
+
+    static const created_at_type_ created_at;
+
+    // updated_at
+    //
+    typedef pgsql::query_column<
+        pgsql::value_traits<::std::chrono::system_clock::time_point, pgsql::id_timestamp>::query_type,
+        pgsql::id_timestamp>
+        updated_at_type_;
+
+    static const updated_at_type_ updated_at;
 };
 
 template <typename A>
-const typename query_columns<::User, id_pgsql, A>::id_type_ query_columns<::User, id_pgsql, A>::id(A::table_name,
-                                                                                                   "\"id\"",
-                                                                                                   0);
-
-template <typename A>
-const typename query_columns<::User, id_pgsql, A>::username_type_ query_columns<::User, id_pgsql, A>::username(
-    A::table_name,
-    "\"username\"",
-    0);
-
-template <typename A>
-const typename query_columns<::User, id_pgsql, A>::passwordHash_type_ query_columns<::User, id_pgsql, A>::passwordHash(
-    A::table_name,
-    "\"passwordHash\"",
-    0);
-
-template <typename A>
-const typename query_columns<::User, id_pgsql, A>::salt_type_ query_columns<::User, id_pgsql, A>::salt(A::table_name,
-                                                                                                       "\"salt\"",
+const typename query_columns<::ApiKey, id_pgsql, A>::id_type_ query_columns<::ApiKey, id_pgsql, A>::id(A::table_name,
+                                                                                                       "\"id\"",
                                                                                                        0);
 
 template <typename A>
-struct pointer_query_columns<::User, id_pgsql, A> : query_columns<::User, id_pgsql, A>
+const typename query_columns<::ApiKey, id_pgsql, A>::hash_type_ query_columns<::ApiKey, id_pgsql, A>::hash(
+    A::table_name,
+    "\"hash\"",
+    0);
+
+template <typename A>
+const typename query_columns<::ApiKey, id_pgsql, A>::description_type_ query_columns<::ApiKey, id_pgsql, A>::
+    description(A::table_name, "\"description\"", 0);
+
+template <typename A>
+const typename query_columns<::ApiKey, id_pgsql, A>::status_type_ query_columns<::ApiKey, id_pgsql, A>::status(
+    A::table_name,
+    "\"status\"",
+    0);
+
+template <typename A>
+const typename query_columns<::ApiKey, id_pgsql, A>::user_id_type_ query_columns<::ApiKey, id_pgsql, A>::user_id(
+    A::table_name,
+    "\"user_id\"",
+    0);
+
+template <typename A>
+const typename query_columns<::ApiKey, id_pgsql, A>::expires_at_type_ query_columns<::ApiKey, id_pgsql, A>::expires_at(
+    A::table_name,
+    "\"expires_at\"",
+    0);
+
+template <typename A>
+const typename query_columns<::ApiKey, id_pgsql, A>::created_at_type_ query_columns<::ApiKey, id_pgsql, A>::created_at(
+    A::table_name,
+    "\"created_at\"",
+    0);
+
+template <typename A>
+const typename query_columns<::ApiKey, id_pgsql, A>::updated_at_type_ query_columns<::ApiKey, id_pgsql, A>::updated_at(
+    A::table_name,
+    "\"updated_at\"",
+    0);
+
+template <typename A>
+struct pointer_query_columns<::ApiKey, id_pgsql, A> : query_columns<::ApiKey, id_pgsql, A>
 {
 };
 
 template <>
-class access::object_traits_impl<::User, id_pgsql> : public access::object_traits<::User>
+class access::object_traits_impl<::ApiKey, id_pgsql> : public access::object_traits<::ApiKey>
 {
 public:
     struct id_image_type
@@ -160,23 +217,43 @@ public:
         long long id_value;
         bool id_null;
 
-        // username_
+        // hash_
         //
-        details::buffer username_value;
-        std::size_t username_size;
-        bool username_null;
+        details::buffer hash_value;
+        std::size_t hash_size;
+        bool hash_null;
 
-        // passwordHash_
+        // description_
         //
-        details::buffer passwordHash_value;
-        std::size_t passwordHash_size;
-        bool passwordHash_null;
+        details::buffer description_value;
+        std::size_t description_size;
+        bool description_null;
 
-        // salt_
+        // status_
         //
-        details::buffer salt_value;
-        std::size_t salt_size;
-        bool salt_null;
+        details::buffer status_value;
+        std::size_t status_size;
+        bool status_null;
+
+        // user_id_
+        //
+        long long user_id_value;
+        bool user_id_null;
+
+        // expires_at_
+        //
+        long long expires_at_value;
+        bool expires_at_null;
+
+        // created_at_
+        //
+        long long created_at_value;
+        bool created_at_null;
+
+        // updated_at_
+        //
+        long long updated_at_value;
+        bool updated_at_null;
 
         std::size_t version;
     };
@@ -205,7 +282,7 @@ public:
 
     typedef pgsql::query_base query_base_type;
 
-    static const std::size_t column_count = 4UL;
+    static const std::size_t column_count = 8UL;
     static const std::size_t id_column_count = 1UL;
     static const std::size_t inverse_column_count = 0UL;
     static const std::size_t readonly_column_count = 0UL;
@@ -261,16 +338,16 @@ public:
 };
 
 template <>
-class access::object_traits_impl<::User, id_common> : public access::object_traits_impl<::User, id_pgsql>
+class access::object_traits_impl<::ApiKey, id_common> : public access::object_traits_impl<::ApiKey, id_pgsql>
 {
 };
 
-// User
+// ApiKey
 //
 } // namespace odb
 
-#include "User-odb.ixx"
+#include "ApiKey-odb.ixx"
 
 #include <odb/post.hxx>
 
-#endif // USER_ODB_HXX
+#endif // API_KEY_ODB_HXX

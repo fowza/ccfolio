@@ -88,10 +88,19 @@ dependency_graph:
 	@echo "Generating dependency graph..."
 	cd $(BUILD_DIR) && $(CMAKE_CMD) .. --graphviz=graph.dot && dot -Tpng graph.dot -o graphImage.png
 
-# Generate ODB schema
+
+ODB_FLAGS = --std c++11 --database pgsql --generate-query --generate-schema
+ODB_OUTPUT_DIR = ./app/Entities/odb
+ODB_COMPILER = odb
+SOURCE_DIR = ./app/Entities
+
+ENTITIES = User.h ApiKey.h
+
 odb_schema:
-	@echo "Generating ODB schema..."
-	odb --std c++11 --database pgsql --generate-query --generate-schema -o ./app/Entities/odb/ ./app/Entities/User.h
+	@echo "Generating ODB schema for multiple entities..."
+	rm -rf ./app/Entities/odb/
+	mkdir ./app/Entities/odb
+	$(foreach entity, $(ENTITIES), $(ODB_COMPILER) $(ODB_FLAGS) -o $(ODB_OUTPUT_DIR) $(SOURCE_DIR)/$(entity);)
 
 db-up:
 	docker run -d --name $(PG_CONTAINER) -e POSTGRES_USER=$(PG_USER) -e POSTGRES_PASSWORD=$(PG_PASSWORD) -p $(PG_PORT):5432 -v $(PG_DATA_VOLUME):/var/lib/postgresql/data $(PG_IMAGE)
