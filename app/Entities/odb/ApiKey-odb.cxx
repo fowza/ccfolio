@@ -41,10 +41,7 @@ const char access::object_traits_impl<::ApiKey, id_pgsql>::erase_query_statement
 const unsigned int access::object_traits_impl<::ApiKey, id_pgsql>::persist_statement_types[] = {pgsql::text_oid,
                                                                                                 pgsql::text_oid,
                                                                                                 pgsql::text_oid,
-                                                                                                pgsql::int8_oid,
-                                                                                                pgsql::timestamp_oid,
-                                                                                                pgsql::timestamp_oid,
-                                                                                                pgsql::timestamp_oid};
+                                                                                                pgsql::int8_oid};
 
 const unsigned int access::object_traits_impl<::ApiKey, id_pgsql>::find_statement_types[] = {pgsql::int8_oid};
 
@@ -52,9 +49,6 @@ const unsigned int access::object_traits_impl<::ApiKey, id_pgsql>::update_statem
                                                                                                pgsql::text_oid,
                                                                                                pgsql::text_oid,
                                                                                                pgsql::int8_oid,
-                                                                                               pgsql::timestamp_oid,
-                                                                                               pgsql::timestamp_oid,
-                                                                                               pgsql::timestamp_oid,
                                                                                                pgsql::int8_oid};
 
 struct access::object_traits_impl<::ApiKey, id_pgsql>::extra_statement_cache_type
@@ -137,18 +131,6 @@ bool access::object_traits_impl<::ApiKey, id_pgsql>::grow(image_type &i, bool *t
     //
     t[4UL] = 0;
 
-    // expires_at_
-    //
-    t[5UL] = 0;
-
-    // created_at_
-    //
-    t[6UL] = 0;
-
-    // updated_at_
-    //
-    t[7UL] = 0;
-
     return grew;
 }
 
@@ -202,27 +184,6 @@ void access::object_traits_impl<::ApiKey, id_pgsql>::bind(pgsql::bind *b, image_
     b[n].type = pgsql::bind::bigint;
     b[n].buffer = &i.user_id_value;
     b[n].is_null = &i.user_id_null;
-    n++;
-
-    // expires_at_
-    //
-    b[n].type = pgsql::bind::timestamp;
-    b[n].buffer = &i.expires_at_value;
-    b[n].is_null = &i.expires_at_null;
-    n++;
-
-    // created_at_
-    //
-    b[n].type = pgsql::bind::timestamp;
-    b[n].buffer = &i.created_at_value;
-    b[n].is_null = &i.created_at_null;
-    n++;
-
-    // updated_at_
-    //
-    b[n].type = pgsql::bind::timestamp;
-    b[n].buffer = &i.updated_at_value;
-    b[n].is_null = &i.updated_at_null;
     n++;
 }
 
@@ -296,42 +257,6 @@ bool access::object_traits_impl<::ApiKey, id_pgsql>::init(image_type &i, const o
         i.user_id_null = is_null;
     }
 
-    // expires_at_
-    //
-    {
-        ::std::chrono::system_clock::time_point const &v = o.expires_at_;
-
-        bool is_null(true);
-        pgsql::value_traits<::std::chrono::system_clock::time_point, pgsql::id_timestamp>::set_image(i.expires_at_value,
-                                                                                                     is_null,
-                                                                                                     v);
-        i.expires_at_null = is_null;
-    }
-
-    // created_at_
-    //
-    {
-        ::std::chrono::system_clock::time_point const &v = o.created_at_;
-
-        bool is_null(false);
-        pgsql::value_traits<::std::chrono::system_clock::time_point, pgsql::id_timestamp>::set_image(i.created_at_value,
-                                                                                                     is_null,
-                                                                                                     v);
-        i.created_at_null = is_null;
-    }
-
-    // updated_at_
-    //
-    {
-        ::std::chrono::system_clock::time_point const &v = o.updated_at_;
-
-        bool is_null(false);
-        pgsql::value_traits<::std::chrono::system_clock::time_point, pgsql::id_timestamp>::set_image(i.updated_at_value,
-                                                                                                     is_null,
-                                                                                                     v);
-        i.updated_at_null = is_null;
-    }
-
     return grew;
 }
 
@@ -386,36 +311,6 @@ void access::object_traits_impl<::ApiKey, id_pgsql>::init(object_type &o, const 
 
         pgsql::value_traits<long unsigned int, pgsql::id_bigint>::set_value(v, i.user_id_value, i.user_id_null);
     }
-
-    // expires_at_
-    //
-    {
-        ::std::chrono::system_clock::time_point &v = o.expires_at_;
-
-        pgsql::value_traits<::std::chrono::system_clock::time_point, pgsql::id_timestamp>::set_value(v,
-                                                                                                     i.expires_at_value,
-                                                                                                     i.expires_at_null);
-    }
-
-    // created_at_
-    //
-    {
-        ::std::chrono::system_clock::time_point &v = o.created_at_;
-
-        pgsql::value_traits<::std::chrono::system_clock::time_point, pgsql::id_timestamp>::set_value(v,
-                                                                                                     i.created_at_value,
-                                                                                                     i.created_at_null);
-    }
-
-    // updated_at_
-    //
-    {
-        ::std::chrono::system_clock::time_point &v = o.updated_at_;
-
-        pgsql::value_traits<::std::chrono::system_clock::time_point, pgsql::id_timestamp>::set_value(v,
-                                                                                                     i.updated_at_value,
-                                                                                                     i.updated_at_null);
-    }
 }
 
 void access::object_traits_impl<::ApiKey, id_pgsql>::init(id_image_type &i, const id_type &id)
@@ -427,29 +322,22 @@ void access::object_traits_impl<::ApiKey, id_pgsql>::init(id_image_type &i, cons
     }
 }
 
-const char access::object_traits_impl<::ApiKey, id_pgsql>::persist_statement[] =
-    "INSERT INTO \"ApiKey\" "
-    "(\"id\", "
-    "\"hash\", "
-    "\"description\", "
-    "\"status\", "
-    "\"user_id\", "
-    "\"expires_at\", "
-    "\"created_at\", "
-    "\"updated_at\") "
-    "VALUES "
-    "(DEFAULT, $1, $2, $3, $4, $5, $6, $7) "
-    "RETURNING \"id\"";
+const char access::object_traits_impl<::ApiKey, id_pgsql>::persist_statement[] = "INSERT INTO \"ApiKey\" "
+                                                                                 "(\"id\", "
+                                                                                 "\"hash\", "
+                                                                                 "\"description\", "
+                                                                                 "\"status\", "
+                                                                                 "\"user_id\") "
+                                                                                 "VALUES "
+                                                                                 "(DEFAULT, $1, $2, $3, $4) "
+                                                                                 "RETURNING \"id\"";
 
 const char access::object_traits_impl<::ApiKey, id_pgsql>::find_statement[] = "SELECT "
                                                                               "\"ApiKey\".\"id\", "
                                                                               "\"ApiKey\".\"hash\", "
                                                                               "\"ApiKey\".\"description\", "
                                                                               "\"ApiKey\".\"status\", "
-                                                                              "\"ApiKey\".\"user_id\", "
-                                                                              "\"ApiKey\".\"expires_at\", "
-                                                                              "\"ApiKey\".\"created_at\", "
-                                                                              "\"ApiKey\".\"updated_at\" "
+                                                                              "\"ApiKey\".\"user_id\" "
                                                                               "FROM \"ApiKey\" "
                                                                               "WHERE \"ApiKey\".\"id\"=$1";
 
@@ -458,11 +346,8 @@ const char access::object_traits_impl<::ApiKey, id_pgsql>::update_statement[] = 
                                                                                 "\"hash\"=$1, "
                                                                                 "\"description\"=$2, "
                                                                                 "\"status\"=$3, "
-                                                                                "\"user_id\"=$4, "
-                                                                                "\"expires_at\"=$5, "
-                                                                                "\"created_at\"=$6, "
-                                                                                "\"updated_at\"=$7 "
-                                                                                "WHERE \"id\"=$8";
+                                                                                "\"user_id\"=$4 "
+                                                                                "WHERE \"id\"=$5";
 
 const char access::object_traits_impl<::ApiKey, id_pgsql>::erase_statement[] = "DELETE FROM \"ApiKey\" "
                                                                                "WHERE \"id\"=$1";
@@ -472,10 +357,7 @@ const char access::object_traits_impl<::ApiKey, id_pgsql>::query_statement[] = "
                                                                                "\"ApiKey\".\"hash\", "
                                                                                "\"ApiKey\".\"description\", "
                                                                                "\"ApiKey\".\"status\", "
-                                                                               "\"ApiKey\".\"user_id\", "
-                                                                               "\"ApiKey\".\"expires_at\", "
-                                                                               "\"ApiKey\".\"created_at\", "
-                                                                               "\"ApiKey\".\"updated_at\" "
+                                                                               "\"ApiKey\".\"user_id\" "
                                                                                "FROM \"ApiKey\"";
 
 const char access::object_traits_impl<::ApiKey, id_pgsql>::erase_query_statement[] = "DELETE FROM \"ApiKey\"";

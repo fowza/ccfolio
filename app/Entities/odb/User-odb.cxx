@@ -42,12 +42,12 @@ const unsigned int access::object_traits_impl<::User, id_pgsql>::persist_stateme
                                                                                               pgsql::text_oid,
                                                                                               pgsql::text_oid};
 
-const unsigned int access::object_traits_impl<::User, id_pgsql>::find_statement_types[] = {pgsql::int8_oid};
+const unsigned int access::object_traits_impl<::User, id_pgsql>::find_statement_types[] = {pgsql::int4_oid};
 
 const unsigned int access::object_traits_impl<::User, id_pgsql>::update_statement_types[] = {pgsql::text_oid,
                                                                                              pgsql::text_oid,
                                                                                              pgsql::text_oid,
-                                                                                             pgsql::int8_oid};
+                                                                                             pgsql::int4_oid};
 
 struct access::object_traits_impl<::User, id_pgsql>::extra_statement_cache_type
 {
@@ -70,7 +70,7 @@ access::object_traits_impl<::User, id_pgsql>::id_type access::object_traits_impl
 
     id_type id;
     {
-        pgsql::value_traits<long unsigned int, pgsql::id_bigint>::set_value(id, i.id_value, i.id_null);
+        pgsql::value_traits<int, pgsql::id_integer>::set_value(id, i.id_value, i.id_null);
     }
 
     return id;
@@ -84,7 +84,7 @@ access::object_traits_impl<::User, id_pgsql>::id_type access::object_traits_impl
 
     id_type id;
     {
-        pgsql::value_traits<long unsigned int, pgsql::id_bigint>::set_value(id, i.id_value, i.id_null);
+        pgsql::value_traits<int, pgsql::id_integer>::set_value(id, i.id_value, i.id_null);
     }
 
     return id;
@@ -97,11 +97,11 @@ bool access::object_traits_impl<::User, id_pgsql>::grow(image_type &i, bool *t)
 
     bool grew(false);
 
-    // id_
+    // id
     //
     t[0UL] = 0;
 
-    // username_
+    // username
     //
     if (t[1UL])
     {
@@ -109,7 +109,7 @@ bool access::object_traits_impl<::User, id_pgsql>::grow(image_type &i, bool *t)
         grew = true;
     }
 
-    // passwordHash_
+    // passwordHash
     //
     if (t[2UL])
     {
@@ -117,7 +117,7 @@ bool access::object_traits_impl<::User, id_pgsql>::grow(image_type &i, bool *t)
         grew = true;
     }
 
-    // salt_
+    // salt
     //
     if (t[3UL])
     {
@@ -136,17 +136,17 @@ void access::object_traits_impl<::User, id_pgsql>::bind(pgsql::bind *b, image_ty
 
     std::size_t n(0);
 
-    // id_
+    // id
     //
     if (sk != statement_insert && sk != statement_update)
     {
-        b[n].type = pgsql::bind::bigint;
+        b[n].type = pgsql::bind::integer;
         b[n].buffer = &i.id_value;
         b[n].is_null = &i.id_null;
         n++;
     }
 
-    // username_
+    // username
     //
     b[n].type = pgsql::bind::text;
     b[n].buffer = i.username_value.data();
@@ -155,7 +155,7 @@ void access::object_traits_impl<::User, id_pgsql>::bind(pgsql::bind *b, image_ty
     b[n].is_null = &i.username_null;
     n++;
 
-    // passwordHash_
+    // passwordHash
     //
     b[n].type = pgsql::bind::text;
     b[n].buffer = i.passwordHash_value.data();
@@ -164,7 +164,7 @@ void access::object_traits_impl<::User, id_pgsql>::bind(pgsql::bind *b, image_ty
     b[n].is_null = &i.passwordHash_null;
     n++;
 
-    // salt_
+    // salt
     //
     b[n].type = pgsql::bind::text;
     b[n].buffer = i.salt_value.data();
@@ -177,7 +177,7 @@ void access::object_traits_impl<::User, id_pgsql>::bind(pgsql::bind *b, image_ty
 void access::object_traits_impl<::User, id_pgsql>::bind(pgsql::bind *b, id_image_type &i)
 {
     std::size_t n(0);
-    b[n].type = pgsql::bind::bigint;
+    b[n].type = pgsql::bind::integer;
     b[n].buffer = &i.id_value;
     b[n].is_null = &i.id_null;
 }
@@ -192,10 +192,10 @@ bool access::object_traits_impl<::User, id_pgsql>::init(image_type &i, const obj
 
     bool grew(false);
 
-    // username_
+    // username
     //
     {
-        ::std::string const &v = o.username_;
+        ::std::string const &v = o.username;
 
         bool is_null(false);
         std::size_t size(0);
@@ -206,10 +206,10 @@ bool access::object_traits_impl<::User, id_pgsql>::init(image_type &i, const obj
         grew = grew || (cap != i.username_value.capacity());
     }
 
-    // passwordHash_
+    // passwordHash
     //
     {
-        ::std::string const &v = o.passwordHash_;
+        ::std::string const &v = o.passwordHash;
 
         bool is_null(false);
         std::size_t size(0);
@@ -220,10 +220,10 @@ bool access::object_traits_impl<::User, id_pgsql>::init(image_type &i, const obj
         grew = grew || (cap != i.passwordHash_value.capacity());
     }
 
-    // salt_
+    // salt
     //
     {
-        ::std::string const &v = o.salt_;
+        ::std::string const &v = o.salt;
 
         bool is_null(false);
         std::size_t size(0);
@@ -243,18 +243,18 @@ void access::object_traits_impl<::User, id_pgsql>::init(object_type &o, const im
     ODB_POTENTIALLY_UNUSED(i);
     ODB_POTENTIALLY_UNUSED(db);
 
-    // id_
+    // id
     //
     {
-        long unsigned int &v = o.id_;
+        int &v = o.id;
 
-        pgsql::value_traits<long unsigned int, pgsql::id_bigint>::set_value(v, i.id_value, i.id_null);
+        pgsql::value_traits<int, pgsql::id_integer>::set_value(v, i.id_value, i.id_null);
     }
 
-    // username_
+    // username
     //
     {
-        ::std::string &v = o.username_;
+        ::std::string &v = o.username;
 
         pgsql::value_traits<::std::string, pgsql::id_string>::set_value(v,
                                                                         i.username_value,
@@ -262,10 +262,10 @@ void access::object_traits_impl<::User, id_pgsql>::init(object_type &o, const im
                                                                         i.username_null);
     }
 
-    // passwordHash_
+    // passwordHash
     //
     {
-        ::std::string &v = o.passwordHash_;
+        ::std::string &v = o.passwordHash;
 
         pgsql::value_traits<::std::string, pgsql::id_string>::set_value(v,
                                                                         i.passwordHash_value,
@@ -273,10 +273,10 @@ void access::object_traits_impl<::User, id_pgsql>::init(object_type &o, const im
                                                                         i.passwordHash_null);
     }
 
-    // salt_
+    // salt
     //
     {
-        ::std::string &v = o.salt_;
+        ::std::string &v = o.salt;
 
         pgsql::value_traits<::std::string, pgsql::id_string>::set_value(v, i.salt_value, i.salt_size, i.salt_null);
     }
@@ -286,7 +286,7 @@ void access::object_traits_impl<::User, id_pgsql>::init(id_image_type &i, const 
 {
     {
         bool is_null(false);
-        pgsql::value_traits<long unsigned int, pgsql::id_bigint>::set_image(i.id_value, is_null, id);
+        pgsql::value_traits<int, pgsql::id_integer>::set_image(i.id_value, is_null, id);
         i.id_null = is_null;
     }
 }
@@ -368,7 +368,7 @@ void access::object_traits_impl<::User, id_pgsql>::persist(database &db, object_
     if (!st.execute())
         throw object_already_persistent();
 
-    obj.id_ = id(sts.id_image());
+    obj.id = id(sts.id_image());
 
     callback(db, static_cast<const object_type &>(obj), callback_event::post_persist);
 }
@@ -386,7 +386,7 @@ void access::object_traits_impl<::User, id_pgsql>::update(database &db, const ob
     pgsql::connection &conn(tr.connection());
     statements_type &sts(conn.statement_cache().find_object<object_type>());
 
-    const id_type &id(obj.id_);
+    const id_type &id(obj.id);
     id_image_type &idi(sts.id_image());
     init(idi, id);
 
@@ -544,7 +544,7 @@ bool access::object_traits_impl<::User, id_pgsql>::reload(database &db, object_t
 
     statements_type::auto_lock l(sts);
 
-    const id_type &id(obj.id_);
+    const id_type &id(obj.id);
 
     if (!find_(sts, &id))
         return false;

@@ -47,12 +47,12 @@ class access::object_traits<::User>
 {
 public:
     typedef ::User object_type;
-    typedef ::std::shared_ptr<::User> pointer_type;
+    typedef ::User *pointer_type;
     typedef odb::pointer_traits<pointer_type> pointer_traits;
 
     static const bool polymorphic = false;
 
-    typedef long unsigned int id_type;
+    typedef int id_type;
 
     static const bool auto_id = true;
 
@@ -87,8 +87,7 @@ struct query_columns<::User, id_pgsql, A>
 {
     // id
     //
-    typedef pgsql::query_column<pgsql::value_traits<long unsigned int, pgsql::id_bigint>::query_type, pgsql::id_bigint>
-        id_type_;
+    typedef pgsql::query_column<pgsql::value_traits<int, pgsql::id_integer>::query_type, pgsql::id_integer> id_type_;
 
     static const id_type_ id;
 
@@ -147,7 +146,7 @@ class access::object_traits_impl<::User, id_pgsql> : public access::object_trait
 public:
     struct id_image_type
     {
-        long long id_value;
+        int id_value;
         bool id_null;
 
         std::size_t version;
@@ -155,24 +154,24 @@ public:
 
     struct image_type
     {
-        // id_
+        // id
         //
-        long long id_value;
+        int id_value;
         bool id_null;
 
-        // username_
+        // username
         //
         details::buffer username_value;
         std::size_t username_size;
         bool username_null;
 
-        // passwordHash_
+        // passwordHash
         //
         details::buffer passwordHash_value;
         std::size_t passwordHash_size;
         bool passwordHash_null;
 
-        // salt_
+        // salt
         //
         details::buffer salt_value;
         std::size_t salt_size;

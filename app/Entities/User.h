@@ -14,42 +14,46 @@
 
 #include <odb/core.hxx>
 #include <string>
-#include <utility>
 
-#pragma db object pointer(std::shared_ptr)
+#pragma db object
 class User
 {
 public:
-    User(std::string username, std::string passwordHash, std::string salt)
-        : username_(std::move(username)), passwordHash_(std::move(passwordHash)), salt_(std::move(salt))
+    User() = default;
+    User(std::string username_, std::string passwordHash_, std::string salt_)
+        : username(std::move(username_)), passwordHash(std::move(passwordHash_)), salt(std::move(salt_))
     {
     }
 
-    [[nodiscard]] const std::string &username() const
+    [[nodiscard]] int getId() const
     {
-        return username_;
+        return id;
     }
-    [[nodiscard]] const std::string &passwordHash() const
+    [[nodiscard]] std::string getUsername() const
     {
-        return passwordHash_;
+        return username;
     }
-    [[nodiscard]] const std::string &salt() const
+    [[nodiscard]] std::string getPasswordHash() const
     {
-        return salt_;
+        return passwordHash;
+    }
+
+    [[nodiscard]] std::string getSalt() const
+    {
+        return salt;
     }
 
 private:
     friend class odb::access;
-    User()
-    {
-    }
 
 #pragma db id auto
-    unsigned long id_;
+    int id{};
 
-    std::string username_;
-    std::string passwordHash_;
-    std::string salt_;
+    std::string username;
+    std::string passwordHash;
+
+#pragma db index
+    std::string salt;
 };
 
 #endif // USER_H

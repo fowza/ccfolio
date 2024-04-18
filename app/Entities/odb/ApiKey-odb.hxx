@@ -119,33 +119,6 @@ struct query_columns<::ApiKey, id_pgsql, A>
         user_id_type_;
 
     static const user_id_type_ user_id;
-
-    // expires_at
-    //
-    typedef pgsql::query_column<
-        pgsql::value_traits<::std::chrono::system_clock::time_point, pgsql::id_timestamp>::query_type,
-        pgsql::id_timestamp>
-        expires_at_type_;
-
-    static const expires_at_type_ expires_at;
-
-    // created_at
-    //
-    typedef pgsql::query_column<
-        pgsql::value_traits<::std::chrono::system_clock::time_point, pgsql::id_timestamp>::query_type,
-        pgsql::id_timestamp>
-        created_at_type_;
-
-    static const created_at_type_ created_at;
-
-    // updated_at
-    //
-    typedef pgsql::query_column<
-        pgsql::value_traits<::std::chrono::system_clock::time_point, pgsql::id_timestamp>::query_type,
-        pgsql::id_timestamp>
-        updated_at_type_;
-
-    static const updated_at_type_ updated_at;
 };
 
 template <typename A>
@@ -173,24 +146,6 @@ template <typename A>
 const typename query_columns<::ApiKey, id_pgsql, A>::user_id_type_ query_columns<::ApiKey, id_pgsql, A>::user_id(
     A::table_name,
     "\"user_id\"",
-    0);
-
-template <typename A>
-const typename query_columns<::ApiKey, id_pgsql, A>::expires_at_type_ query_columns<::ApiKey, id_pgsql, A>::expires_at(
-    A::table_name,
-    "\"expires_at\"",
-    0);
-
-template <typename A>
-const typename query_columns<::ApiKey, id_pgsql, A>::created_at_type_ query_columns<::ApiKey, id_pgsql, A>::created_at(
-    A::table_name,
-    "\"created_at\"",
-    0);
-
-template <typename A>
-const typename query_columns<::ApiKey, id_pgsql, A>::updated_at_type_ query_columns<::ApiKey, id_pgsql, A>::updated_at(
-    A::table_name,
-    "\"updated_at\"",
     0);
 
 template <typename A>
@@ -240,21 +195,6 @@ public:
         long long user_id_value;
         bool user_id_null;
 
-        // expires_at_
-        //
-        long long expires_at_value;
-        bool expires_at_null;
-
-        // created_at_
-        //
-        long long created_at_value;
-        bool created_at_null;
-
-        // updated_at_
-        //
-        long long updated_at_value;
-        bool updated_at_null;
-
         std::size_t version;
     };
 
@@ -282,7 +222,7 @@ public:
 
     typedef pgsql::query_base query_base_type;
 
-    static const std::size_t column_count = 8UL;
+    static const std::size_t column_count = 5UL;
     static const std::size_t id_column_count = 1UL;
     static const std::size_t inverse_column_count = 0UL;
     static const std::size_t readonly_column_count = 0UL;

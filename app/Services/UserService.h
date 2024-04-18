@@ -101,16 +101,16 @@ public:
             }
 
             const auto &user = userResult.GetResult().value();
-            bool isLoginSuccess = PasswordHelper::VerifyUserPassword(user.passwordHash(), user.salt(), password);
+            bool isLoginSuccess = PasswordHelper::VerifyUserPassword(user.getPasswordHash(), user.getSalt(), password);
 
             if (!isLoginSuccess)
             {
                 LOG(LogService::LogLevel::INFO,
-                    fmt::format("Wrong username or password for user with username: {}", user.username()));
+                    fmt::format("Wrong username or password for user with username: {}", user.getUsername()));
                 return ResponseDto<UserDto>::Failure("Wrong username or password!");
             }
 
-            UserDto userDto{userResult.GetResult()->username()};
+            UserDto userDto{userResult.GetResult()->getUsername()};
             userDto.token = JWTHelper::CreateJWTToken(userDto.username);
             return ResponseDto<UserDto>::Success(userDto);
         }

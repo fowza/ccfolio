@@ -9,7 +9,7 @@ namespace odb
 
 inline access::object_traits<::User>::id_type access::object_traits<::User>::id(const object_type &o)
 {
-    return o.id_;
+    return o.id;
 }
 
 inline void access::object_traits<::User>::callback(database &db, object_type &x, callback_event e)

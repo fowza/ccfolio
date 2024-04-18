@@ -9,7 +9,4 @@ CREATE TABLE "ApiKey" (
   "hash" TEXT NOT NULL,
   "description" TEXT NOT NULL,
   "status" TEXT NOT NULL,
-  "user_id" BIGINT NOT NULL,
-  "expires_at" TIMESTAMP NULL,
-  "created_at" TIMESTAMP NOT NULL DEFAULT 'CURRENT_TIMESTAMP',
-  "updated_at" TIMESTAMP NOT NULL DEFAULT 'CURRENT_TIMESTAMP');
+  "user_id" BIGINT NOT NULL);
